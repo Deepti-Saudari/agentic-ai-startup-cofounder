@@ -1,10 +1,16 @@
+<p align="center">
+
+<img src="images/banner.png" width="100%">
+
+</p>
+
 <div align="center">
 
 # 🚀 AI Startup Co-Founder
 
 ### Your AI-Powered Startup Companion
 
-**Transform startup ideas into investor-ready businesses using 13 specialized AI agents.**
+Transform startup ideas into investor-ready businesses using **13 Specialized AI Agents**.
 
 <p>
 
@@ -23,6 +29,8 @@
 </p>
 
 </div>
+
+---
 
 ---
 
