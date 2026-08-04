@@ -289,6 +289,5 @@ This project is licensed under the **MIT License**.
 
 It helps others discover the project and motivates future improvements.
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=gradient&section=footer"/>
-
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=220&section=footer&color=0:0F172A,50:2563EB,100:7C3AED"/>
 </div>
