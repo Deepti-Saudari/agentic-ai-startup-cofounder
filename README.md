@@ -54,6 +54,29 @@ Instead of relying on a single chatbot, the platform distributes startup tasks a
 The goal is to reduce the time required to move from an idea to an actionable startup strategy while providing organized, AI-assisted decision support.
 
 ---
+# 🎬 Application Demo
+
+Experience the complete workflow of **AI Startup Co-Founder**, from startup idea validation to business planning, financial modeling, and investor-ready documentation.
+
+
+
+https://github.com/user-attachments/assets/c5e73d03-c191-487e-af44-1f541ad3314e
+
+
+
+---
+
+### 🎯 Demo Highlights
+
+- 💡 Startup Idea Validation
+- 📊 Market Research & Competitor Analysis
+- 💼 Business Plan Generation
+- 💰 Financial Modeling
+- 📈 Go-To-Market Strategy
+- 🎤 Investor Pitch Preparation
+- 🤖 Multi-Agent AI Workflow
+
+---
 # ✨ Core Features
 
 | 🚀 Feature | Description |
