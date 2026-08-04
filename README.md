@@ -95,18 +95,47 @@ The platform follows a modular multi-agent architecture where user requests are 
 
 
 ---
-
 # 🛠️ Technology Stack
 
-| Category | Technologies |
-|----------|--------------|
-| **Frontend** | Next.js, React, Tailwind CSS, TypeScript |
-| **Backend** | Python, FastAPI |
-| **AI & LLM** | Groq LLaMA, Prompt Engineering, Multi-Agent System |
-| **API** | REST APIs |
-| **Tools** | Git, GitHub, VS Code |
-| **Deployment Ready** | Vercel, Render |
+### Frontend
 
+<p>
+
+<img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind"/>
+
+</p>
+
+---
+
+### Backend
+
+<p>
+
+<img src="https://skillicons.dev/icons?i=python,fastapi"/>
+
+</p>
+
+---
+
+### AI / Machine Learning
+
+- Multi-Agent Systems
+- Prompt Engineering
+- Groq LLM
+- Natural Language Processing
+- Startup Intelligence
+
+---
+
+### Development Tools
+
+<p>
+
+<img src="https://skillicons.dev/icons?i=git,github,vscode"/>
+
+</p>
+
+---
 ---
 
 # 📂 Project Structure
