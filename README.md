@@ -102,21 +102,18 @@ The goal is to reduce the time required to move from an idea to an actionable st
 ---
 # 🎥 Product Demo
 
-<p align="center">
+https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder/blob/main/Video%20Project.mp4
 
-<a href="[https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder/blob/main/Video%20Project.mp4](https://raw.githubusercontent.com/Deepti-Saudari/agentic-ai-startup-cofounder/main/Video%20Project.mp4)">
+---
 
-<img src="images/banner.png" width="100%" alt="Watch Product Demo">
+Watch the complete walkthrough of **AI Startup Co-Founder**, including:
 
-</a>
-
-</p>
-
-<p align="center">
-
-<b>🎬 Click the banner above to watch the complete product demonstration.</b>
-
-</p>
+- 💡 Startup Idea Validation
+- 📊 Market Research
+- 💼 Business Planning
+- 💰 Financial Modeling
+- 📈 Go-To-Market Strategy
+- 🤖 AI Agent Workflow
 
 ---
 
