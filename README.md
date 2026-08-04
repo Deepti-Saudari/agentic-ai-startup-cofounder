@@ -106,46 +106,16 @@ The goal is to reduce the time required to move from an idea to an actionable st
 > **Note:** Create a `docs/` folder later and place the screenshots with these exact names.
 
 ---
-
 # 🏗️ System Architecture
 
-```text
-                           User
-                             │
-                             ▼
-                 Next.js + React Frontend
-                             │
-                     REST API Requests
-                             │
-                             ▼
-                    FastAPI Backend API
-                             │
-                    Agent Orchestrator
-                             │
-     ┌──────────────────────────────────────────┐
-     │                                          │
-     │   💡 Startup Validation Agent            │
-     │   📊 Market Research Agent               │
-     │   💼 Business Plan Agent                 │
-     │   💰 Financial Model Agent               │
-     │   📈 Marketing Strategy Agent            │
-     │   🎤 Pitch Deck Agent                    │
-     │   📄 Legal Documentation Agent           │
-     │   👥 Hiring Agent                        │
-     │   🛣 Roadmap Agent                       │
-     │   💵 Funding Strategy Agent              │
-     │   ⚙ Operations Agent                    │
-     │   🤖 AI Co-Founder Agent                │
-     │   📑 Report Generator                   │
-     │                                          │
-     └──────────────────────────────────────────┘
-                             │
-                             ▼
-                      Groq LLM API
-                             │
-                             ▼
-                  AI Generated Business Reports
-```
+<p align="center">
+
+<img src="images/architecture.png" width="100%">
+
+</p>
+
+The platform follows a modular multi-agent architecture where user requests are processed through a FastAPI backend, coordinated by an Agent Orchestrator, and delegated to specialized AI agents. Each agent focuses on a specific business function such as startup validation, market research, financial modeling, business planning, or investor readiness before generating structured outputs using Groq LLMs.
+
 
 ---
 
