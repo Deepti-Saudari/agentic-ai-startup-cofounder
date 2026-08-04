@@ -102,7 +102,7 @@ The goal is to reduce the time required to move from an idea to an actionable st
 ---
 # 🎥 Product Demo
 
-https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder/blob/main/Video%20Project.mp4
+https://github.com/user-attachments/assets/5024ed3a-d145-413f-a642-cc70f090d117
 
 ---
 
