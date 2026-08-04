@@ -121,7 +121,6 @@ Whether you're exploring your first startup idea or refining an existing busines
 | Add Screenshot | Add Screenshot |
 
 ---
-
 # 🏗️ System Architecture
 
 ```text
@@ -273,7 +272,6 @@ This project is licensed under the MIT License.
 Made with ❤️ by **Deepti Saudari**
 
 </div>
-
 ---
 
 # 📊 Project Highlights
