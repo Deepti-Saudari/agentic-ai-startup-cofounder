@@ -1,138 +1,123 @@
-﻿# 🚀 AI Startup Co-founder
+<div align="center">
 
-<p align="center">
-  <img src="./public/banner.png" alt="Banner"/>
+# 🚀 AI Startup Co-Founder
+
+### Your AI-Powered Startup Companion
+
+Transform startup ideas into investor-ready businesses using **13 Specialized AI Agents**.
+
+<p>
+
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+
+<img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
+
+<img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js"/>
+
+<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript"/>
+
+<img src="https://img.shields.io/badge/Groq_LLM-FF6B35?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/AI_Agents-13-success?style=for-the-badge"/>
+
 </p>
 
-<div align="center">
-  <img src="https://img.shields.io/badge/AI-Powered-blue" />
-  <img src="https://img.shields.io/badge/Next.js-14.2.16-black" />
-  <img src="https://img.shields.io/badge/Python-3.13+-blue" />
-  <img src="https://img.shields.io/badge/License-MIT-green" />
 </div>
-
-## 📖 Overview
-
-**AI Startup Co-founder** is an intelligent platform that acts as your virtual business partner, helping entrepreneurs from idea to launch. It combines 13 specialized AI agents to provide deep strategic analysis, industry intelligence, and actionable insights.
-
-## ✨ Key Features
-
-### 🤖 13 Specialized AI Agents
-
-| Agent | Function |
-|-------|----------|
-| **Idea Generator** | VC-grade startup opportunity analysis with 8-layer strategic framework |
-| **Market Research** | Competitor analysis, trend identification, and market sizing |
-| **Business Plan** | Comprehensive business plan generation with lean canvas |
-| **Financial Model** | Revenue projections, unit economics, and break-even analysis |
-| **Legal Documents** | Contracts, NDAs, and compliance templates |
-| **Pitch Deck** | Investor-ready presentations with storytelling framework |
-| **Product Development** | MVP roadmap, tech stack planning, and feature prioritization |
-| **Marketing Strategy** | Go-to-market plans, channel selection, and growth strategies |
-| **Funding Strategy** | Investor matching, fundraising roadmap, and term sheet analysis |
-| **Team & Hiring** | Organization structure, role definitions, and hiring plans |
-| **Startup Roadmap** | Milestone tracking, progress monitoring, and timeline management |
-| **Operations** | Infrastructure planning, process optimization, and KPIs |
-| **AI Co-founder** | Conversational business partner for real-time guidance |
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Language**: TypeScript
-
-### Backend
-- **Framework**: FastAPI (Python)
-- **AI Models**: Groq (Llama 3.3 70B)
-
-## 📋 Prerequisites
-
-- Node.js 18+
-- Python 3.13+
-- Groq API Key (Get from [console.groq.com](https://console.groq.com))
-
-## 🚦 Getting Started
-
-### 1. Clone the Repository
-\`\`\`bash
-git clone https://github.com/YOUR_USERNAME/ai-startup-cofounder.git
-cd ai-startup-cofounder
-\`\`\`
-
-### 2. Install Frontend Dependencies
-\`\`\`bash
-npm install
-\`\`\`
-
-### 3. Install Backend Dependencies
-\`\`\`bash
-cd backend
-pip install -r requirements.txt
-cd ..
-\`\`\`
-
-### 4. Configure Environment Variables
-
-**Frontend:**
-\`\`\`bash
-cp .env.example .env.local
-\`\`\`
-
-**Backend:**
-\`\`\`bash
-cd backend
-cp .env.example .env
-# Add your Groq API key to .env
-\`\`\`
-
-### 5. Start Backend
-\`\`\`bash
-cd backend
-uvicorn main:app --reload
-\`\`\`
-
-### 6. Start Frontend
-\`\`\`bash
-npm run dev
-\`\`\`
-
-### 7. Open your browser
-\`\`\`
-http://localhost:3000
-\`\`\`
-
-## 📁 Project Structure
-
-\`\`\`
-Project_Test-1/
-├── app/                    # Next.js pages
-├── components/             # React components
-├── backend/                # FastAPI backend
-│   ├── agents/            # 13 AI agents
-│   ├── main.py
-│   └── requirements.txt
-├── README.md
-└── package.json
-\`\`\`
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-MIT License
-
-## 🙏 Acknowledgments
-
-- Built with [Groq](https://groq.com/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Icons from [Lucide](https://lucide.dev/)
 
 ---
 
-<div align="center">
-  Made with ❤️ for entrepreneurs building the future
-</div>
-"@ | Out-File -FilePath README.md -Encoding UTF8
+# 📖 Overview
+
+AI Startup Co-Founder is an intelligent platform designed to help entrepreneurs move from an initial idea to a structured startup plan.
+
+Instead of relying on a single AI prompt, the platform coordinates **13 specialized AI agents**, each responsible for a different aspect of startup development—from validating ideas and researching competitors to generating financial models, business plans, and investor-ready documents.
+
+Whether you're exploring your first startup idea or refining an existing business, the platform provides a guided workflow that reduces research time and helps organize strategic decisions.
+
+---
+
+# ✨ Key Features
+
+## 💡 Startup Validation
+
+- Validate startup ideas
+- Opportunity scoring
+- SWOT analysis
+- Problem-solution fit
+- Market opportunity analysis
+
+---
+
+## 📊 Market Intelligence
+
+- Competitor analysis
+- Industry research
+- Customer persona generation
+- Market sizing
+- Trend analysis
+
+---
+
+## 💼 Business Planning
+
+- Business Model Canvas
+- Lean Canvas
+- Revenue model generation
+- Pricing strategy
+- Business roadmap
+
+---
+
+## 💰 Financial Planning
+
+- Revenue forecasting
+- Expense estimation
+- Break-even analysis
+- Financial projections
+- Investment planning
+
+---
+
+## 🎤 Investor Readiness
+
+- Pitch deck generation
+- Executive summary
+- Funding strategy
+- Investor preparation
+- Business documentation
+
+---
+
+## 📈 Growth Strategy
+
+- Go-To-Market strategy
+- Marketing planning
+- Hiring roadmap
+- Operational planning
+- KPI recommendations
+
+---
+
+## 🤖 AI Co-Founder
+
+- Interactive AI assistant
+- Startup guidance
+- Decision support
+- Personalized recommendations
+- Continuous brainstorming
+
+---
+
+# 📸 Application Preview
+
+> Replace these with screenshots from your project.
+
+| Dashboard | Financial Planning |
+|-----------|-------------------|
+| Add Screenshot | Add Screenshot |
+
+| Market Research | Business Plan |
+|-----------------|---------------|
+| Add Screenshot | Add Screenshot |
+
+---
