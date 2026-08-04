@@ -6,7 +6,7 @@
 
 </p>
 
-https://github.com/user-attachments/assets/f547287e-be59-4fcb-b8d9-94bb26556f6b
+
 
 
 
@@ -102,17 +102,7 @@ The goal is to reduce the time required to move from an idea to an actionable st
 ---
 # 📸 Application Preview
 
-<div align="center">
-
-| Dashboard | Financial Model |
-|-----------|-----------------|
-| <img src="docs/dashboard.png" width="100%"> | <img src="docs/financial-model.png" width="100%"> |
-
-| Market Research | Business Plan |
-|-----------------|---------------|
-| <img src="docs/market-research.png" width="100%"> | <img src="docs/business-plan.png" width="100%"> |
-
-</div>
+https://github.com/user-attachments/assets/f547287e-be59-4fcb-b8d9-94bb26556f6b
 
 > **Note:** Create a `docs/` folder later and place the screenshots with these exact names.
 
