@@ -4,7 +4,7 @@
 
 ### Your AI-Powered Startup Companion
 
-Transform startup ideas into investor-ready businesses using **13 Specialized AI Agents**.
+**Transform startup ideas into investor-ready businesses using 13 specialized AI agents.**
 
 <p>
 
@@ -12,13 +12,13 @@ Transform startup ideas into investor-ready businesses using **13 Specialized AI
 
 <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
 
-<img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js"/>
+<img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs"/>
 
-<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript"/>
+<img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react"/>
+
+<img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss"/>
 
 <img src="https://img.shields.io/badge/Groq_LLM-FF6B35?style=for-the-badge"/>
-
-<img src="https://img.shields.io/badge/AI_Agents-13-success?style=for-the-badge"/>
 
 </p>
 
@@ -28,151 +28,129 @@ Transform startup ideas into investor-ready businesses using **13 Specialized AI
 
 # 📖 Overview
 
-AI Startup Co-Founder is an intelligent platform designed to help entrepreneurs move from an initial idea to a structured startup plan.
+AI Startup Co-Founder is an AI-powered platform that helps entrepreneurs transform ideas into structured business plans using a team of specialized AI agents.
 
-Instead of relying on a single AI prompt, the platform coordinates **13 specialized AI agents**, each responsible for a different aspect of startup development—from validating ideas and researching competitors to generating financial models, business plans, and investor-ready documents.
+Instead of relying on a single chatbot, the platform distributes startup tasks across dedicated agents responsible for idea validation, market research, financial planning, pitch deck creation, marketing strategy, legal documentation, hiring plans, and roadmap generation.
 
-Whether you're exploring your first startup idea or refining an existing business, the platform provides a guided workflow that reduces research time and helps organize strategic decisions.
+The goal is to reduce the time required to move from an idea to an actionable startup strategy while providing organized, AI-assisted decision support.
 
 ---
 
-# ✨ Key Features
+# 🎯 Core Features
 
-## 💡 Startup Validation
+### 💡 Startup Validation
 
 - Validate startup ideas
 - Opportunity scoring
 - SWOT analysis
-- Problem-solution fit
-- Market opportunity analysis
+- Problem–solution fit
 
----
-
-## 📊 Market Intelligence
+### 📊 Market Research
 
 - Competitor analysis
-- Industry research
-- Customer persona generation
 - Market sizing
-- Trend analysis
+- Industry trends
+- Customer personas
 
----
-
-## 💼 Business Planning
+### 💼 Business Planning
 
 - Business Model Canvas
 - Lean Canvas
-- Revenue model generation
+- Revenue model
 - Pricing strategy
-- Business roadmap
 
----
+### 💰 Financial Planning
 
-## 💰 Financial Planning
-
-- Revenue forecasting
+- Revenue projections
 - Expense estimation
 - Break-even analysis
-- Financial projections
 - Investment planning
 
----
+### 📈 Growth Strategy
 
-## 🎤 Investor Readiness
+- Go-To-Market strategy
+- Marketing roadmap
+- KPI planning
+- Operations planning
+
+### 🎤 Investor Toolkit
 
 - Pitch deck generation
 - Executive summary
 - Funding strategy
-- Investor preparation
 - Business documentation
 
 ---
-
-## 📈 Growth Strategy
-
-- Go-To-Market strategy
-- Marketing planning
-- Hiring roadmap
-- Operational planning
-- KPI recommendations
-
----
-
-## 🤖 AI Co-Founder
-
-- Interactive AI assistant
-- Startup guidance
-- Decision support
-- Personalized recommendations
-- Continuous brainstorming
-
----
-
 # 📸 Application Preview
 
-> Replace these with screenshots from your project.
+<div align="center">
 
-| Dashboard | Financial Planning |
-|-----------|-------------------|
-| Add Screenshot | Add Screenshot |
+| Dashboard | Financial Model |
+|-----------|-----------------|
+| <img src="docs/dashboard.png" width="100%"> | <img src="docs/financial-model.png" width="100%"> |
 
 | Market Research | Business Plan |
 |-----------------|---------------|
-| Add Screenshot | Add Screenshot |
+| <img src="docs/market-research.png" width="100%"> | <img src="docs/business-plan.png" width="100%"> |
+
+</div>
+
+> **Note:** Create a `docs/` folder later and place the screenshots with these exact names.
 
 ---
+
 # 🏗️ System Architecture
 
 ```text
-                    User
-                      │
-                      ▼
-            Next.js Frontend (React)
-                      │
-          REST API Communication
-                      │
-                      ▼
-               FastAPI Backend
-                      │
-             Agent Orchestrator
-                      │
- ┌─────────────────────────────────────────────┐
- │                                             │
- │  💡 Idea Validation Agent                   │
- │  📊 Market Research Agent                   │
- │  💼 Business Plan Agent                     │
- │  💰 Financial Model Agent                   │
- │  📈 Marketing Strategy Agent                │
- │  🎤 Pitch Deck Agent                        │
- │  📄 Legal Documentation Agent               │
- │  👥 Team Planning Agent                     │
- │  🛣️ Roadmap Agent                           │
- │  💵 Funding Strategy Agent                  │
- │  ⚙️ Operations Agent                        │
- │  🤖 AI Co-Founder Chat Agent                │
- │  📑 Report Generation Agent                 │
- │                                             │
- └─────────────────────────────────────────────┘
-                      │
-                      ▼
-                Groq LLM APIs
-                      │
-                      ▼
-              AI Generated Results
+                           User
+                             │
+                             ▼
+                 Next.js + React Frontend
+                             │
+                     REST API Requests
+                             │
+                             ▼
+                    FastAPI Backend API
+                             │
+                    Agent Orchestrator
+                             │
+     ┌──────────────────────────────────────────┐
+     │                                          │
+     │   💡 Startup Validation Agent            │
+     │   📊 Market Research Agent               │
+     │   💼 Business Plan Agent                 │
+     │   💰 Financial Model Agent               │
+     │   📈 Marketing Strategy Agent            │
+     │   🎤 Pitch Deck Agent                    │
+     │   📄 Legal Documentation Agent           │
+     │   👥 Hiring Agent                        │
+     │   🛣 Roadmap Agent                       │
+     │   💵 Funding Strategy Agent              │
+     │   ⚙ Operations Agent                    │
+     │   🤖 AI Co-Founder Agent                │
+     │   📑 Report Generator                   │
+     │                                          │
+     └──────────────────────────────────────────┘
+                             │
+                             ▼
+                      Groq LLM API
+                             │
+                             ▼
+                  AI Generated Business Reports
 ```
 
 ---
 
-# ⚙️ Technology Stack
+# 🛠️ Technology Stack
 
 | Category | Technologies |
 |----------|--------------|
-| Frontend | Next.js, React, Tailwind CSS, TypeScript |
-| Backend | FastAPI, Python |
-| AI | Groq LLaMA, Prompt Engineering, Multi-Agent System |
-| APIs | REST APIs |
-| Tools | Git, GitHub, VS Code |
-| Deployment | Ready for Vercel + Render |
+| **Frontend** | Next.js, React, Tailwind CSS, TypeScript |
+| **Backend** | Python, FastAPI |
+| **AI & LLM** | Groq LLaMA, Prompt Engineering, Multi-Agent System |
+| **API** | REST APIs |
+| **Tools** | Git, GitHub, VS Code |
+| **Deployment Ready** | Vercel, Render |
 
 ---
 
@@ -184,8 +162,8 @@ agentic-ai-startup-cofounder/
 ├── app/
 ├── backend/
 ├── components/
-├── hooks/
 ├── agents/
+├── hooks/
 ├── public/
 ├── styles/
 ├── data/
@@ -195,23 +173,46 @@ agentic-ai-startup-cofounder/
 ```
 
 ---
-
 # 🚀 Getting Started
 
-## Clone Repository
+## Prerequisites
+
+Make sure you have the following installed:
+
+- Python 3.10+
+- Node.js 18+
+- npm
+- Git
+
+---
+
+## Clone the Repository
 
 ```bash
 git clone https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder.git
+
+cd agentic-ai-startup-cofounder
 ```
 
-## Frontend
+---
+
+## Frontend Setup
 
 ```bash
 npm install
+
 npm run dev
 ```
 
-## Backend
+Frontend runs on:
+
+```
+http://localhost:3000
+```
+
+---
+
+## Backend Setup
 
 ```bash
 cd backend
@@ -221,111 +222,25 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
----
+Backend runs on:
 
-# 🔑 Environment Variables
-
-Create a `.env` file.
-
-```env
-GROQ_API_KEY=YOUR_API_KEY
+```
+http://localhost:8000
 ```
 
 ---
 
-# 🎯 Future Improvements
+# 🔑 Environment Variables
 
-- AI-powered MVP Generator
-- Pitch Deck Designer
-- Investor Matching
-- Customer Discovery Agent
-- Startup Progress Dashboard
-- PDF Export
-- Authentication
-- Cloud Deployment
-- Team Collaboration
-- Analytics Dashboard
+Create a `.env` file inside the backend directory.
+
+```env
+GROQ_API_KEY=your_groq_api_key
+```
 
 ---
 
-# 🤝 Contributing
-
-Contributions are welcome.
-
-1. Fork this repository
-2. Create a new branch
-3. Commit your changes
-4. Open a Pull Request
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-<div align="center">
-
-### ⭐ If you like this project, consider giving it a star!
-
-Made with ❤️ by **Deepti Saudari**
-
-</div>
----
-
-# 📊 Project Highlights
-
-<div align="center">
-
-| Feature | Details |
-|:--------:|:-------|
-| 🤖 AI Agents | 13 Specialized AI Agents |
-| ⚡ Backend | FastAPI + Python |
-| 🖥 Frontend | Next.js + React + Tailwind CSS |
-| 🧠 AI Model | Groq LLaMA |
-| 📈 Startup Modules | 10+ |
-| 🔌 REST APIs | 15+ |
-| 💼 Business Tools | Pitch Deck, Financial Model, Market Research, Roadmap |
-
-</div>
-
----
-
-# 🎯 Why This Project?
-
-Unlike traditional startup planning tools, **AI Startup Co-Founder** combines multiple specialized AI agents into a single workflow, allowing entrepreneurs to move from an idea to a structured business strategy with AI-assisted decision making.
-
-The project demonstrates:
-
-- Multi-Agent AI Architecture
-- Backend API Design
-- LLM Integration
-- Full-Stack Development
-- Modular Software Engineering
-- Real-world AI Product Development
-
----
-
-# 📷 Screenshots
-
-> Replace these placeholders with actual screenshots from your application.
-
-| Home | Dashboard |
-|------|-----------|
-| ![](docs/home.png) | ![](docs/dashboard.png) |
-
-| Market Research | Financial Model |
-|-----------------|-----------------|
-| ![](docs/market.png) | ![](docs/financial.png) |
-
-| Business Plan |
-|---------------|
-| ![](docs/business-plan.png) |
-
----
-
-# 🗺 Roadmap
+# 📌 Future Roadmap
 
 - [x] Multi-Agent Architecture
 - [x] Startup Validation
@@ -336,27 +251,61 @@ The project demonstrates:
 - [ ] Authentication
 - [ ] Team Collaboration
 - [ ] PDF Export
+- [ ] Analytics Dashboard
 - [ ] Cloud Deployment
 - [ ] Live Demo
 
 ---
 
-# 🌟 Support
+# 🤝 Contributing
 
-If you found this repository useful:
+Contributions are welcome.
 
-⭐ Star this repository
+1. Fork this repository
+2. Create a feature branch
 
-🍴 Fork it
+```bash
+git checkout -b feature-name
+```
 
-💡 Share your feedback through Issues
+3. Commit your changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push your branch
+
+```bash
+git push origin feature-name
+```
+
+5. Open a Pull Request
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+# 👩‍💻 Author
+
+**Deepti Saudari**
+
+- 📧 saudarideepti@gmail.com
+- 💼 https://www.linkedin.com/in/deepti-saudari/
+- 🐙 https://github.com/Deepti-Saudari
 
 ---
 
 <div align="center">
 
-### 🚀 Building the Future of Entrepreneurship with AI
+## ⭐ If you found this project useful, consider giving it a Star!
 
-**Made with ❤️ by Deepti Saudari**
+It helps others discover the project and motivates future improvements.
+
+<img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=gradient&section=footer"/>
 
 </div>
