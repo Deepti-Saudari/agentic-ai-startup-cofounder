@@ -100,11 +100,15 @@ The goal is to reduce the time required to move from an idea to an actionable st
 - Business documentation
 
 ---
-# 📸 Application Preview
+<p align="center">
+
+### 🎥 Watch the Product Demo
 
 https://github.com/user-attachments/assets/f547287e-be59-4fcb-b8d9-94bb26556f6b
 
-> **Note:** Create a `docs/` folder later and place the screenshots with these exact names.
+</p>
+
+The demo showcases the complete startup workflow, including idea validation, market research, business planning, financial modeling, and AI-powered recommendations generated through the multi-agent system.
 
 ---
 # 🏗️ System Architecture
