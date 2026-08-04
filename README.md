@@ -54,55 +54,17 @@ Instead of relying on a single chatbot, the platform distributes startup tasks a
 The goal is to reduce the time required to move from an idea to an actionable startup strategy while providing organized, AI-assisted decision support.
 
 ---
+# ✨ Core Features
 
-# 🎯 Core Features
-
-### 💡 Startup Validation
-
-- Validate startup ideas
-- Opportunity scoring
-- SWOT analysis
-- Problem–solution fit
-
-### 📊 Market Research
-
-- Competitor analysis
-- Market sizing
-- Industry trends
-- Customer personas
-
-### 💼 Business Planning
-
-- Business Model Canvas
-- Lean Canvas
-- Revenue model
-- Pricing strategy
-
-### 💰 Financial Planning
-
-- Revenue projections
-- Expense estimation
-- Break-even analysis
-- Investment planning
-
-### 📈 Growth Strategy
-
-- Go-To-Market strategy
-- Marketing roadmap
-- KPI planning
-- Operations planning
-
-### 🎤 Investor Toolkit
-
-- Pitch deck generation
-- Executive summary
-- Funding strategy
-- Business documentation
-
----
-# 🎥 Product Demo
-
-https://github.com/user-attachments/assets/5024ed3a-d145-413f-a642-cc70f090d117
+| 🚀 Feature | Description |
+|------------|-------------|
+| 💡 **Idea Validation** | Evaluate startup ideas with AI-powered scoring, SWOT analysis, and opportunity assessment. |
+| 📊 **Market Research** | Analyze competitors, identify market trends, estimate market size, and generate customer personas. |
+| 💼 **Business Planning** | Create Lean Canvas, Business Model Canvas, pricing strategies, and business roadmaps. |
+| 💰 **Financial Planning** | Generate revenue forecasts, expense estimates, break-even analysis, and financial projections. |
+| 🎤 **Pitch Deck Generator** | Build investor-ready pitch decks and executive summaries. |
+| 📈 **Go-To-Market Strategy** | Receive AI-generated launch plans, marketing strategies, and KPI recommendations. |
+| 🤖 **13 Specialized AI Agents** | Dedicated AI agents collaborate to automate startup planning and strategic decision-making. |
 
 ---
 
