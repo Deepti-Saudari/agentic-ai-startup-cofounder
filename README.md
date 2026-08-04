@@ -60,7 +60,11 @@ Experience the complete workflow of **AI Startup Co-Founder**, from startup idea
 
 
 
-https://github.com/user-attachments/assets/c5e73d03-c191-487e-af44-1f541ad3314e
+
+
+https://github.com/user-attachments/assets/968f3c3f-29db-4357-9b73-429997dceb40
+
+
 
 
 
