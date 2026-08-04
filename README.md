@@ -100,15 +100,28 @@ The goal is to reduce the time required to move from an idea to an actionable st
 - Business documentation
 
 ---
+# 🎥 Product Demo
+
 <p align="center">
 
-### 🎥 Watch the Product Demo
+<a href="https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder/blob/main/Video%20Project.mp4">
 
-https://github.com/user-attachments/assets/f547287e-be59-4fcb-b8d9-94bb26556f6b
+<img src="images/banner.png" width="100%" alt="Watch Product Demo">
+
+</a>
 
 </p>
 
-The demo showcases the complete startup workflow, including idea validation, market research, business planning, financial modeling, and AI-powered recommendations generated through the multi-agent system.
+<p align="center">
+
+<b>🎬 Click the banner above to watch the complete product demonstration.</b>
+
+</p>
+
+---
+
+The demo walks through the complete workflow of the platform, including startup validation, market research, business planning, financial modeling, and AI-powered recommendations.
+
 
 ---
 # 🏗️ System Architecture
