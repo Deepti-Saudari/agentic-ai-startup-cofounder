@@ -104,7 +104,7 @@ The goal is to reduce the time required to move from an idea to an actionable st
 
 <p align="center">
 
-<a href="https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder/blob/main/Video%20Project.mp4">
+<a href="[https://github.com/Deepti-Saudari/agentic-ai-startup-cofounder/blob/main/Video%20Project.mp4](https://raw.githubusercontent.com/Deepti-Saudari/agentic-ai-startup-cofounder/main/Video%20Project.mp4)">
 
 <img src="images/banner.png" width="100%" alt="Watch Product Demo">
 
