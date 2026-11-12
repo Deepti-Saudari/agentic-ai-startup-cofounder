@@ -1,9 +1,22 @@
 "use client"
 
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Bell, Settings, User, Search } from "lucide-react"
+import {
+  Bell,
+  Settings,
+  Search,
+  Download,
+  Upload,
+  RotateCcw,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Database,
+} from "lucide-react"
 import { usePathname } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,124 +26,263 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useStartup } from "@/context/startup-context"
+import { getApiUrl } from "@/lib/api"
 
 const pageNames: Record<string, { title: string; description: string }> = {
   "/": {
-    title: "Dashboard",
-    description: "Your startup command center",
+    title: "Command Center",
+    description: "Multi-agent startup orchestration and overview",
   },
   "/ideas": {
     title: "Idea Generator",
-    description: "Generate AI-powered startup ideas",
+    description: "Generate and evaluate strategic venture opportunities",
   },
   "/market": {
     title: "Market Research",
-    description: "Analyze competitors and trends",
+    description: "Competitor intelligence, personas, and market sizing",
   },
   "/business-plan": {
     title: "Business Plan",
-    description: "Create comprehensive business plans",
+    description: "Lean canvas, SWOT analysis, and executive strategy",
   },
   "/financials": {
     title: "Financial Model",
-    description: "Build revenue projections",
+    description: "Unit economics, cash runway, and revenue projections",
   },
   "/legal": {
     title: "Legal Documents",
-    description: "Generate contracts and templates",
+    description: "Founders agreements, NDAs, and contract generation",
   },
   "/pitch-deck": {
     title: "Pitch Deck",
-    description: "Create investor presentations",
+    description: "Investor presentation slides and narrative structure",
   },
   "/product": {
     title: "Product Development",
-    description: "Plan your MVP and roadmap",
+    description: "MVP feature scope, tech stack, and sprint planning",
   },
   "/marketing": {
     title: "Marketing Strategy",
-    description: "Go-to-market and growth plans",
+    description: "Go-to-market channels, CAC, and acquisition loops",
   },
   "/funding": {
     title: "Funding Strategy",
-    description: "Find and attract investors",
+    description: "Cap table, investor matching, and valuation models",
   },
   "/team": {
     title: "Team & Hiring",
-    description: "Build your dream team",
+    description: "Organizational design, role profiles, and compensation",
   },
   "/roadmap": {
     title: "Startup Roadmap",
-    description: "Track milestones and progress",
+    description: "Milestone execution, quarterly goals, and KPI tracking",
+  },
+  "/operations": {
+    title: "Operations & Scaling",
+    description: "Operating system, tools stack, and risk management",
   },
   "/chat": {
-    title: "AI Co-Founder",
-    description: "Chat with your AI business partner",
+    title: "AI Co-Founder Chat",
+    description: "Real-time strategic guidance and venture decision support",
   },
 }
 
 export function DashboardHeader() {
   const pathname = usePathname()
-  const pageInfo = pageNames[pathname] || { title: "Dashboard", description: "Your startup command center" }
+  const pageInfo = pageNames[pathname] || {
+    title: "Dashboard",
+    description: "Your startup command center",
+  }
+
+  const { project, updateProject, resetProject, exportProjectJson, importProjectJson, isHydrated } =
+    useStartup()
+
+  const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking")
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Check backend health periodically
+  useEffect(() => {
+    let isMounted = true
+    const checkBackend = async () => {
+      try {
+        const res = await fetch(getApiUrl("/health"), { signal: AbortSignal.timeout(3000) })
+        if (res.ok && isMounted) {
+          setBackendStatus("online")
+        } else if (isMounted) {
+          setBackendStatus("offline")
+        }
+      } catch {
+        if (isMounted) setBackendStatus("offline")
+      }
+    }
+    checkBackend()
+    const timer = setInterval(checkBackend, 30000)
+    return () => {
+      isMounted = false
+      clearInterval(timer)
+    }
+  }, [])
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result as string
+      if (content) {
+        const success = importProjectJson(content)
+        if (success) {
+          alert("Project data imported successfully!")
+        } else {
+          alert("Invalid project file format.")
+        }
+      }
+    }
+    reader.readAsText(file)
+  }
 
   return (
-    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="flex items-center justify-between px-6 py-3">
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold tracking-tight">{pageInfo.title}</h1>
-          <p className="text-sm text-muted-foreground">{pageInfo.description}</p>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Search */}
-          <div className="relative hidden md:block">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-[200px] lg:w-[300px] pl-8 bg-muted/50"
-            />
+    <header className="border-b border-border/60 bg-background/80 backdrop-blur-md sticky top-0 z-40 transition-colors">
+      <div className="flex items-center justify-between px-6 py-3.5 gap-4">
+        {/* Page Title & Active Startup Badge */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 min-w-0">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              {pageInfo.title}
+            </h1>
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              {pageInfo.description}
+            </p>
           </div>
 
-          {/* Notifications */}
+          {/* Active Project Tag */}
+          {isHydrated && (
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
+              <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+              <span className="truncate max-w-[180px] font-semibold">{project.startupName}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Right Header Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Storage & Backend Status */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Storage Auto-Save Indicator */}
+            <Badge
+              variant="outline"
+              className="gap-1.5 text-[11px] font-normal border-border/80 bg-muted/30"
+              title={
+                project.lastSavedAt
+                  ? `Saved locally at ${new Date(project.lastSavedAt).toLocaleTimeString()}`
+                  : "Auto-saves locally in browser"
+              }
+            >
+              <Database className="w-3 h-3 text-primary" />
+              <span>Auto-saved</span>
+            </Badge>
+
+            {/* Backend Connectivity Status */}
+            <Badge
+              variant="outline"
+              className="gap-1.5 text-[11px] font-normal border-border/80 bg-muted/30"
+              title="FastAPI Backend Connectivity"
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  backendStatus === "online"
+                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                    : backendStatus === "checking"
+                    ? "bg-amber-400 animate-pulse"
+                    : "bg-red-400"
+                }`}
+              />
+              <span className="capitalize">{backendStatus === "online" ? "API Live" : backendStatus}</span>
+            </Badge>
+          </div>
+
+          {/* Project Persistence Actions Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs font-medium h-9 border-border/80 hover:bg-muted/60"
+              >
+                <Database className="w-3.5 h-3.5 text-primary" />
+                <span className="hidden sm:inline">Project Data</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-xs font-semibold">Workspace Storage</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <div className="py-2 px-3 text-sm text-muted-foreground">
-                No new notifications
-              </div>
+              <DropdownMenuItem onClick={exportProjectJson} className="gap-2 text-xs cursor-pointer">
+                <Download className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>Export Project JSON</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-2 text-xs cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>Import Project JSON</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={resetProject}
+                className="gap-2 text-xs text-destructive focus:text-destructive cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Workspace</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Settings */}
-          <Button variant="ghost" size="icon">
-            <Settings className="w-4 h-4" />
-          </Button>
+          {/* Hidden File Input for JSON restore */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full border border-border/80">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                    CF
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel>
+                <p className="text-xs font-medium text-foreground">AI Co-Founder Suite</p>
+                <p className="text-[11px] text-muted-foreground font-normal truncate">
+                  {project.startupName}
+                </p>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  const newName = prompt("Rename your startup:", project.startupName)
+                  if (newName?.trim()) updateProject({ startupName: newName.trim() })
+                }}
+                className="text-xs cursor-pointer"
+              >
+                Rename Startup
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportProjectJson} className="text-xs cursor-pointer">
+                Download Backup
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

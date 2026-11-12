@@ -1,10 +1,10 @@
 import { PageLayout } from "@/components/page-layout"
-import { BusinessPlan } from "@/components/business-plan"
+import { MarketResearch } from "@/components/market-research"
 
-export default function BusinessPlanPage() {
+export default function MarketPage() {
   return (
     <PageLayout>
-      <BusinessPlan />
+      <MarketResearch />
     </PageLayout>
   )
 }
