@@ -13,6 +13,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Database,
+  Server,
+  RefreshCw,
+  ExternalLink,
+  Check,
+  XCircle,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { Input } from "@/components/ui/input"
@@ -25,10 +30,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useStartup } from "@/context/startup-context"
-import { getApiUrl } from "@/lib/api"
+import { getApiUrl, getBaseApiUrl } from "@/lib/api"
 
 const pageNames: Record<string, { title: string; description: string }> = {
   "/": {
@@ -100,30 +113,99 @@ export function DashboardHeader() {
     useStartup()
 
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking")
+  const [activeBackendUrl, setActiveBackendUrl] = useState<string>("/api")
+  const [modalOpen, setModalOpen] = useState(false)
+  const [inputUrl, setInputUrl] = useState("")
+  const [isTesting, setIsTesting] = useState(false)
+  const [diagnosticResult, setDiagnosticResult] = useState<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Check backend health periodically
-  useEffect(() => {
-    let isMounted = true
-    const checkBackend = async () => {
-      try {
-        const res = await fetch(getApiUrl("/health"), { signal: AbortSignal.timeout(3000) })
-        if (res.ok && isMounted) {
-          setBackendStatus("online")
-        } else if (isMounted) {
-          setBackendStatus("offline")
-        }
-      } catch {
-        if (isMounted) setBackendStatus("offline")
+  const checkBackend = async () => {
+    try {
+      const currentUrl = getBaseApiUrl()
+      setActiveBackendUrl(currentUrl)
+
+      // Increased timeout to 12s so Render cold-starts don't instantly show false offline
+      const res = await fetch(getApiUrl("/health"), { signal: AbortSignal.timeout(12000) })
+      if (res.ok) {
+        setBackendStatus("online")
+      } else {
+        setBackendStatus("offline")
       }
+    } catch {
+      setBackendStatus("offline")
     }
+  }
+
+  useEffect(() => {
     checkBackend()
-    const timer = setInterval(checkBackend, 30000)
-    return () => {
-      isMounted = false
-      clearInterval(timer)
+    if (typeof window !== "undefined") {
+      setInputUrl(localStorage.getItem("ai_startup_custom_backend") || "")
     }
+    const timer = setInterval(checkBackend, 30000)
+    return () => clearInterval(timer)
   }, [])
+
+  const handleTestAndConnect = async () => {
+    setIsTesting(true)
+    setDiagnosticResult(null)
+
+    const targetUrl = inputUrl.trim().replace(/\/+$/, "")
+    const healthEndpoint = targetUrl ? `${targetUrl}/health` : "/api/health"
+    const groqTestEndpoint = targetUrl ? `${targetUrl}/test-groq` : "/api/health"
+
+    try {
+      const healthRes = await fetch(healthEndpoint, { signal: AbortSignal.timeout(15000) })
+      if (!healthRes.ok) {
+        throw new Error(`Endpoint returned HTTP ${healthRes.status}`)
+      }
+      const healthData = await healthRes.json()
+
+      let groqData = null
+      try {
+        const groqRes = await fetch(groqTestEndpoint, { signal: AbortSignal.timeout(15000) })
+        if (groqRes.ok) {
+          groqData = await groqRes.json()
+        }
+      } catch {}
+
+      setDiagnosticResult({
+        success: true,
+        health: healthData,
+        groq: groqData,
+        message: targetUrl ? `Successfully connected to ${targetUrl}` : "Connected to built-in Vercel AI routes",
+      })
+
+      if (typeof window !== "undefined") {
+        if (targetUrl) {
+          localStorage.setItem("ai_startup_custom_backend", targetUrl)
+        } else {
+          localStorage.removeItem("ai_startup_custom_backend")
+        }
+      }
+      setActiveBackendUrl(targetUrl || "/api")
+      setBackendStatus("online")
+    } catch (err: any) {
+      setDiagnosticResult({
+        success: false,
+        error: err?.message || "Failed to reach backend",
+        suggestion: "If using Render, it may be waking up from sleep (wait 40s) or check your Render URL.",
+      })
+      setBackendStatus("offline")
+    } finally {
+      setIsTesting(false)
+    }
+  }
+
+  const handleResetToVercel = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("ai_startup_custom_backend")
+    }
+    setInputUrl("")
+    setActiveBackendUrl("/api")
+    setDiagnosticResult(null)
+    checkBackend()
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -184,11 +266,13 @@ export function DashboardHeader() {
               <span>Auto-saved</span>
             </Badge>
 
-            {/* Backend Connectivity Status */}
-            <Badge
+            {/* Backend Connectivity Status Button */}
+            <Button
               variant="outline"
-              className="gap-1.5 text-[11px] font-normal border-border/80 bg-muted/30"
-              title="FastAPI Backend Connectivity"
+              size="sm"
+              onClick={() => setModalOpen(true)}
+              className="h-7 px-2.5 gap-1.5 text-[11px] font-normal border-border/80 bg-muted/30 hover:bg-muted/60"
+              title="Click to configure or test Backend API connection"
             >
               <span
                 className={`w-2 h-2 rounded-full ${
@@ -199,8 +283,11 @@ export function DashboardHeader() {
                     : "bg-red-400"
                 }`}
               />
-              <span className="capitalize">{backendStatus === "online" ? "API Live" : backendStatus}</span>
-            </Badge>
+              <span className="font-medium">
+                {backendStatus === "online" ? "API Live" : backendStatus === "checking" ? "Checking API..." : "API Offline"}
+              </span>
+              <Settings className="w-3 h-3 text-muted-foreground ml-0.5" />
+            </Button>
           </div>
 
           {/* Project Persistence Actions Dropdown */}
@@ -249,44 +336,126 @@ export function DashboardHeader() {
             onChange={handleFileUpload}
           />
 
-          {/* Theme Toggle Button */}
+          {/* Dark / Light Theme Toggle */}
           <ThemeToggle />
 
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full border border-border/80">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                    CF
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>
-                <p className="text-xs font-medium text-foreground">AI Co-Founder Suite</p>
-                <p className="text-[11px] text-muted-foreground font-normal truncate">
-                  {project.startupName}
-                </p>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  const newName = prompt("Rename your startup:", project.startupName)
-                  if (newName?.trim()) updateProject({ startupName: newName.trim() })
-                }}
-                className="text-xs cursor-pointer"
-              >
-                Rename Startup
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportProjectJson} className="text-xs cursor-pointer">
-                Download Backup
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Founder Avatar */}
+          <Avatar className="w-9 h-9 border border-border/80">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+              {project.startupName.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </div>
+
+      {/* Backend API Configuration & Diagnostics Dialog */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Server className="w-4 h-4 text-primary" /> Backend API & AI Diagnostics
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Configure where the frontend routes AI requests (Render FastAPI or built-in Vercel functions).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-foreground">Active Backend URL</label>
+                <Badge variant={backendStatus === "online" ? "default" : "secondary"} className="text-[10px]">
+                  {backendStatus === "online" ? "Connected" : "Offline"}
+                </Badge>
+              </div>
+              <Input
+                placeholder="https://your-backend.onrender.com (or leave empty for /api)"
+                value={inputUrl}
+                onChange={(e) => setInputUrl(e.target.value)}
+                className="text-xs h-9 font-mono"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Paste your live Render URL (e.g. <code className="text-[10px] bg-muted px-1 py-0.5 rounded">https://agentic-ai-startup-cofounder-backend.onrender.com</code>).
+              </p>
+            </div>
+
+            {/* Test Results Output */}
+            {diagnosticResult && (
+              <div
+                className={`p-3 rounded-lg text-xs space-y-1.5 border ${
+                  diagnosticResult.success
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-foreground"
+                    : "bg-destructive/10 border-destructive/30 text-destructive"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-semibold">
+                  {diagnosticResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-destructive" />
+                  )}
+                  <span>{diagnosticResult.success ? "Connection Verified!" : "Connection Failed"}</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  {diagnosticResult.message || diagnosticResult.error}
+                </p>
+                {diagnosticResult.groq && (
+                  <div className="pt-1 text-[11px] border-t border-border/40 font-mono">
+                    Groq Status: {diagnosticResult.groq.status || (diagnosticResult.groq.success ? "Connected" : "Check API Key")}
+                  </div>
+                )}
+                {diagnosticResult.suggestion && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Tip: {diagnosticResult.suggestion}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex sm:justify-between gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleResetToVercel}
+              className="text-xs"
+            >
+              Reset to Vercel AI
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setModalOpen(false)}
+                className="text-xs"
+              >
+                Close
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={isTesting}
+                onClick={handleTestAndConnect}
+                className="text-xs gap-1.5 font-semibold"
+              >
+                {isTesting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    Testing...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    Connect & Save
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </header>
   )
 }

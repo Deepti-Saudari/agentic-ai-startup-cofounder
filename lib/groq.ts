@@ -1,4 +1,16 @@
-// Lightweight native Groq API caller for Next.js serverless functions
+// Lightweight native Groq API caller with multi-model fallback for Next.js serverless functions
+
+const GROQ_MODELS = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "llama3-70b-8192",
+  "llama3-8b-8192",
+]
+
+function getCleanApiKey(): string {
+  const raw = process.env.GROQ_API_KEY || ""
+  return raw.trim().replace(/^["']|["']$/g, "")
+}
 
 export async function callGroq(
   userPrompt: string,
@@ -10,7 +22,7 @@ export async function callGroq(
     fallbackData?: any
   } = {}
 ): Promise<any> {
-  const apiKey = process.env.GROQ_API_KEY
+  const apiKey = getCleanApiKey()
 
   if (!apiKey) {
     console.warn("[Groq] No GROQ_API_KEY configured in environment. Using fallback response.")
@@ -20,88 +32,119 @@ export async function callGroq(
     throw new Error("GROQ_API_KEY is not configured in Vercel environment variables.")
   }
 
-  try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          ...(options.systemPrompt
-            ? [{ role: "system", content: options.systemPrompt }]
-            : []),
-          { role: "user", content: userPrompt },
-        ],
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.maxTokens ?? 3000,
-        response_format: options.jsonMode ? { type: "json_object" } : undefined,
-      }),
-    })
+  const messages = [
+    ...(options.systemPrompt
+      ? [{ role: "system", content: options.systemPrompt }]
+      : []),
+    { role: "user", content: userPrompt },
+  ]
 
-    if (!res.ok) {
-      const errText = await res.text()
-      console.error("[Groq API Error]", res.status, errText)
-      if (options.fallbackData !== undefined) return options.fallbackData
-      throw new Error(`Groq API returned ${res.status}: ${errText}`)
+  let lastError: any = null
+
+  for (const model of GROQ_MODELS) {
+    try {
+      const maxTokens = model.includes("8b") && (options.maxTokens || 3000) > 4096
+        ? 4096
+        : (options.maxTokens ?? 3000)
+
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: options.temperature ?? 0.7,
+          max_tokens: maxTokens,
+          response_format: options.jsonMode ? { type: "json_object" } : undefined,
+        }),
+      })
+
+      if (!res.ok) {
+        const errText = await res.text()
+        console.warn(`[Groq Model ${model} returned ${res.status}]: ${errText}`)
+        // If authentication failed (401), stop cycling models
+        if (res.status === 401) {
+          throw new Error(`Invalid GROQ_API_KEY: ${errText}`)
+        }
+        lastError = new Error(`Groq ${model} status ${res.status}: ${errText}`)
+        continue
+      }
+
+      const data = await res.json()
+      const content = data.choices?.[0]?.message?.content?.trim() || ""
+
+      if (options.jsonMode) {
+        return parseJsonCompletion(content, options.fallbackData)
+      }
+
+      return content
+    } catch (err: any) {
+      if (err.message && err.message.includes("Invalid GROQ_API_KEY")) {
+        throw err
+      }
+      lastError = err
+      continue
     }
-
-    const data = await res.json()
-    const content = data.choices?.[0]?.message?.content?.trim() || ""
-
-    if (options.jsonMode) {
-      return parseJsonCompletion(content, options.fallbackData)
-    }
-
-    return content
-  } catch (err: any) {
-    console.error("[Groq Call Error]", err)
-    if (options.fallbackData !== undefined) {
-      return options.fallbackData
-    }
-    throw err
   }
+
+  console.error("[Groq Call All Models Failed]", lastError)
+  if (options.fallbackData !== undefined) {
+    return options.fallbackData
+  }
+  throw lastError || new Error("Failed to get response from Groq models.")
 }
 
 export async function chatCompletion(
   messages: { role: string; content: string }[],
   options: { model?: string; temperature?: number; max_tokens?: number } = {}
 ): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY
+  const apiKey = getCleanApiKey()
 
   if (!apiKey) {
     return ""
   }
 
-  try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: options.model || "llama-3.3-70b-versatile",
-        messages,
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.max_tokens ?? 3000,
-      }),
-    })
+  const requestedModel = options.model || "llama-3.3-70b-versatile"
+  const modelsToTry = [requestedModel, ...GROQ_MODELS.filter(m => m !== requestedModel)]
 
-    if (!res.ok) {
-      const err = await res.text()
-      console.error("[Groq chatCompletion error]", res.status, err)
-      return ""
+  for (const model of modelsToTry) {
+    try {
+      const maxTokens = model.includes("8b") && (options.max_tokens || 3000) > 4096
+        ? 4096
+        : (options.max_tokens ?? 3000)
+
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: options.temperature ?? 0.7,
+          max_tokens: maxTokens,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.text()
+        console.warn(`[Groq chatCompletion ${model} error]`, res.status, err)
+        if (res.status === 401) return ""
+        continue
+      }
+
+      const data = await res.json()
+      return data.choices?.[0]?.message?.content?.trim() || ""
+    } catch (err) {
+      continue
     }
-
-    const data = await res.json()
-    return data.choices?.[0]?.message?.content?.trim() || ""
-  } catch (err) {
-    console.error("[Groq chatCompletion exception]", err)
-    return ""
   }
+
+  return ""
 }
 
 export function parseJsonCompletion<T>(text: string, fallback: T): T {
