@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { callAPI } from "@/lib/api"
+import { useStartup } from "@/context/startup-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -170,38 +171,46 @@ const sampleTrends: MarketTrend[] = [
 ]
 
 export function MarketResearch() {
-  const [industry, setIndustry] = useState("")
-  const [targetMarket, setTargetMarket] = useState("")
+  const { project, updateProject } = useStartup()
+  const [industry, setIndustry] = useState(project.industry || "")
+  const [targetMarket, setTargetMarket] = useState(project.targetMarket || "")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [hasResults, setHasResults] = useState(false)
+  const [hasResults, setHasResults] = useState(Boolean(project.marketResearch))
+  const [analysis, setAnalysis] = useState<any>(project.marketResearch)
 
-  const [analysis, setAnalysis] = useState<any>(null)
+  useEffect(() => {
+    if (project.industry && !industry) setIndustry(project.industry)
+    if (project.targetMarket && !targetMarket) setTargetMarket(project.targetMarket)
+    if (project.marketResearch && !analysis) {
+      setAnalysis(project.marketResearch)
+      setHasResults(true)
+    }
+  }, [project.industry, project.targetMarket, project.marketResearch])
 
   const runAnalysis = async () => {
+    setIsAnalyzing(true)
 
-  setIsAnalyzing(true)
+    try {
+      const result = await callAPI("/market-research", {
+        industry: industry,
+        target_market: targetMarket,
+      })
 
-  try {
+      if (result && result.analysis) {
+        setAnalysis(result.analysis)
+        setHasResults(true)
+        updateProject({
+          industry,
+          targetMarket,
+          marketResearch: result.analysis,
+        })
+      }
+    } catch (error) {
+      console.error("Market research error:", error)
+    }
 
-    const result = await callAPI("/market-research", {
-      industry: industry,
-      target_market: targetMarket
-    })
-
-    console.log("Market analysis:", result)
-
-    setAnalysis(result.analysis)
-
-    setHasResults(true)
-
-  } catch (error) {
-
-    console.error("Market research error:", error)
-
+    setIsAnalyzing(false)
   }
-
-  setIsAnalyzing(false)
-}
 
   const getThreatColor = (level: string) => {
     switch (level) {

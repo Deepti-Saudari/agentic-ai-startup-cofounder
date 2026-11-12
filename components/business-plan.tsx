@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { FileText, Target, TrendingUp, AlertTriangle, CheckCircle, Download, Save, RefreshCw } from "lucide-react"
 import { getApiUrl } from "@/lib/api"
+import { useStartup } from "@/context/startup-context"
 
 interface LeanCanvasData {
   problem: string
@@ -32,50 +33,67 @@ interface SWOTData {
 
 export function BusinessPlan() {
   const [activeTab, setActiveTab] = useState("lean-canvas")
+  const { project, updateProject } = useStartup()
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const [startupIdea, setStartupIdea] = useState("")
+  const [startupIdea, setStartupIdea] = useState(project.startupIdea || "")
 
-  const [leanCanvas, setLeanCanvas] = useState<LeanCanvasData>({
-    problem: "",
-    solution: "",
-    keyMetrics: "",
-    uniqueValueProposition: "",
-    unfairAdvantage: "",
-    channels: "",
-    customerSegments: "",
-    costStructure: "",
-    revenueStreams: "",
-  })
+  const [leanCanvas, setLeanCanvas] = useState<LeanCanvasData>(
+    project.businessPlan?.lean_canvas || {
+      problem: "",
+      solution: "",
+      keyMetrics: "",
+      uniqueValueProposition: "",
+      unfairAdvantage: "",
+      channels: "",
+      customerSegments: "",
+      costStructure: "",
+      revenueStreams: "",
+    }
+  )
 
-  const [swot, setSWOT] = useState<SWOTData>({
-    strengths: [],
-    weaknesses: [],
-    opportunities: [],
-    threats: [],
-  })
-  const [executiveSummary, setExecutiveSummary] = useState<any>(null)
+  const [swot, setSWOT] = useState<SWOTData>(
+    project.businessPlan?.swot || {
+      strengths: [],
+      weaknesses: [],
+      opportunities: [],
+      threats: [],
+    }
+  )
+  const [executiveSummary, setExecutiveSummary] = useState<any>(
+    project.businessPlan?.executive_summary || null
+  )
+
+  useEffect(() => {
+    if (project.startupIdea && !startupIdea) {
+      setStartupIdea(project.startupIdea)
+    }
+    if (project.businessPlan) {
+      if (project.businessPlan.lean_canvas) setLeanCanvas(project.businessPlan.lean_canvas)
+      if (project.businessPlan.swot) setSWOT(project.businessPlan.swot)
+      if (project.businessPlan.executive_summary) setExecutiveSummary(project.businessPlan.executive_summary)
+    }
+  }, [project.startupIdea, project.businessPlan])
 
   const generateBusinessPlan = async () => {
-  setIsGenerating(true)
+    setIsGenerating(true)
 
-  try {
-    const response = await fetch(getApiUrl("/business-plan"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        startup_idea: startupIdea
+    try {
+      const response = await fetch(getApiUrl("/business-plan"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          startup_idea: startupIdea,
+        }),
       })
-    })
 
-    const data = await response.json()
+      const data = await response.json()
 
-    if (data.plan) {
-      setLeanCanvas(
-        data.plan.lean_canvas || {
+      if (data.plan) {
+        const newLean = data.plan.lean_canvas || {
           problem: "",
           solution: "",
           keyMetrics: "",
@@ -84,31 +102,47 @@ export function BusinessPlan() {
           channels: "",
           customerSegments: "",
           costStructure: "",
-          revenueStreams: ""
+          revenueStreams: "",
         }
-      )
-
-      setSWOT(
-        data.plan.swot || {
+        const newSwot = data.plan.swot || {
           strengths: [],
           weaknesses: [],
           opportunities: [],
-          threats: []
+          threats: [],
         }
-      )
+        const newExec = data.plan.executive_summary || null
 
-      setExecutiveSummary(data.plan.executive_summary || null)
+        setLeanCanvas(newLean)
+        setSWOT(newSwot)
+        setExecutiveSummary(newExec)
+
+        updateProject({
+          startupIdea,
+          businessPlan: {
+            lean_canvas: newLean,
+            swot: newSwot,
+            executive_summary: newExec,
+          },
+        })
+      }
+    } catch (error) {
+      console.error("Business Plan Error:", error)
     }
-  } catch (error) {
-    console.error("Business Plan Error:", error)
-  }
 
-  setIsGenerating(false)
-}
+    setIsGenerating(false)
+  }
 
   const savePlan = async () => {
     setIsSaving(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    updateProject({
+      startupIdea,
+      businessPlan: {
+        lean_canvas: leanCanvas,
+        swot: swot,
+        executive_summary: executiveSummary,
+      },
+    })
+    await new Promise((resolve) => setTimeout(resolve, 600))
     setIsSaving(false)
   }
   const router = useRouter()
