@@ -22,6 +22,7 @@ import {
   VideoIcon, FileText, CheckSquare, XCircle, PlusCircle,
   ExternalLink, MapPin, Twitter, Linkedin, Github
 } from "lucide-react"
+import { getApiUrl } from "@/lib/api"
 
 // ============= INTERFACES =============
 interface Investor {
@@ -197,7 +198,7 @@ export function FundingStrategy() {
 
     try {
       // Call your API
-      const response = await fetch('/api/investors', {
+      const response = await fetch(getApiUrl('/investors'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

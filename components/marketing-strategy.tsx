@@ -146,11 +146,14 @@ export function MarketingStrategy() {
       const data = await response.json();
       
       if (data.marketing_plan) {
-        // Check if it's already enhanced format
+        // Check if it's already complete enhanced format
         if (data.marketing_plan.target_audience && 
             Array.isArray(data.marketing_plan.target_audience) && 
             data.marketing_plan.target_audience.length > 0 &&
-            typeof data.marketing_plan.target_audience[0] === 'object') {
+            typeof data.marketing_plan.target_audience[0] === 'object' &&
+            data.marketing_plan.content_strategy &&
+            data.marketing_plan.budget_breakdown &&
+            data.marketing_plan.kpis) {
           setPlan(data.marketing_plan);
           setHasPlan(true);
         } else {

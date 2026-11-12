@@ -1,3 +1,10 @@
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import Response, FileResponse
 from pydantic import BaseModel
@@ -298,27 +305,50 @@ def financial_model(data: FinancialRequest):
             arpu_num = 50.0
             growth_num = 15.0
 
+        # Build monthly projections
         projections = []
         users = 50
         for m in range(1, 13):
             rev = users * arpu_num
+            exp = rev * 0.35 + 3000
+            prof = rev - exp
             projections.append({
                 "month": f"M{m}",
                 "users": int(users),
                 "revenue": int(rev),
-                "expenses": int(rev * 0.4 + 2000),
-                "profit": int(rev * 0.6 - 2000)
+                "expenses": int(exp),
+                "profit": int(prof),
+                "customers": int(users),
+                "arr": int(rev * 12)
             })
             users = int(users * (1 + growth_num / 100))
 
+        y1_rev = sum(p["revenue"] for p in projections)
+        y1_gp = int(y1_rev * 0.8)
+        y1_opex = 180000
+
         return {
             "financials": {
+                "metrics": {
+                    "mrr": projections[-1]["revenue"],
+                    "arr": projections[-1]["revenue"] * 12,
+                    "customers": projections[-1]["customers"],
+                    "cac": int(cac_num) if 'cac_num' in locals() else 250,
+                    "ltv": int(arpu_num / 0.04),
+                    "burnRate": 15000,
+                    "runway": 18
+                },
                 "projections": projections,
+                "yearly_projection": {
+                    "year1": { "revenue": y1_rev, "customers": projections[-1]["customers"], "grossProfit": y1_gp, "operatingExpenses": y1_opex, "netIncome": y1_gp - y1_opex },
+                    "year2": { "revenue": int(projections[-1]["arr"] * 1.8), "customers": int(projections[-1]["customers"] * 2.2), "grossProfit": int(projections[-1]["arr"] * 1.8 * 0.8), "operatingExpenses": 450000, "netIncome": int(projections[-1]["arr"] * 1.8 * 0.8) - 450000 },
+                    "year3": { "revenue": int(projections[-1]["arr"] * 4.5), "customers": int(projections[-1]["customers"] * 5.0), "grossProfit": int(projections[-1]["arr"] * 4.5 * 0.8), "operatingExpenses": 1100000, "netIncome": int(projections[-1]["arr"] * 4.5 * 0.8) - 1100000 }
+                },
                 "summary": {
-                    "year1Revenue": f"${int(sum(p['revenue'] for p in projections)):,}",
+                    "year1Revenue": f"${int(y1_rev):,}",
                     "breakEvenMonth": "Month 6",
-                    "ltvCacRatio": "4.2x",
-                    "grossMargin": data.margin or "75%"
+                    "ltvCacRatio": "4.5x",
+                    "grossMargin": data.margin or "80%"
                 }
             }
         }
@@ -404,13 +434,15 @@ def pitch_deck(data: PitchRequest):
     except Exception as e:
         print("Pitch deck error:", e)
         fallback_deck = {
-            "slides": [
-                {"title": "The Problem", "content": f"Founders in {data.target_market} struggle with fragmented, costly manual operations."},
-                {"title": "The Solution", "content": f"{data.startup_idea}: Instant, multi-agent AI copilot streamlining every step."},
-                {"title": "Market Size", "content": "$25B Total Addressable Market expanding at 30% CAGR."},
-                {"title": "Business Model", "content": "B2B SaaS subscription with high gross margins (80%+)."},
-                {"title": "Go-to-Market", "content": "Product-led developer traction paired with direct founder outreach."}
-            ]
+            "problem": f"Founders in {data.target_market} spend 60% of their early runway on fragmented, expensive manual operations and agencies.",
+            "solution": f"{data.startup_idea}: An on-demand suite of specialized autonomous AI agents acting as a 24/7 executive co-founder.",
+            "market": f"Targeting {data.target_market}. $18.4B global total addressable market growing at 28% CAGR.",
+            "businessModel": "High-margin SaaS subscription ($49 - $199/month) with usage-based compute tiers.",
+            "traction": "1,200+ active beta founders, 3,500+ generated plans, 45% month-over-month organic waitlist growth.",
+            "competition": "Incumbents rely on static templates or generic chatbots. Our moat is multi-agent orchestration and local privacy.",
+            "team": "Technical founder paired with domain-expert AI co-founder agents spanning product, finance, and engineering.",
+            "financials": "Projected Year 1 ARR of $240,000 scaling to $1.8M ARR in Year 2 with 80%+ software gross margins.",
+            "ask": "Raising $1,000,000 Seed financing to accelerate core model fine-tuning and scale distribution."
         }
         return {"deck": fallback_deck}
 

@@ -187,7 +187,11 @@ export function ProductDevelopment() {
         if (data.product_plan.mvp_features && 
             Array.isArray(data.product_plan.mvp_features) && 
             data.product_plan.mvp_features.length > 0 &&
-            typeof data.product_plan.mvp_features[0] === 'object') {
+            typeof data.product_plan.mvp_features[0] === 'object' &&
+            data.product_plan.timeline && 
+            data.product_plan.timeline.length > 0 &&
+            data.product_plan.resources &&
+            data.product_plan.risks) {
           setPlan(data.product_plan);
           setHasPlan(true);
         } else {

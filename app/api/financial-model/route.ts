@@ -84,9 +84,27 @@ Return ONLY valid JSON matching this schema:
       },
       projections,
       yearly_projection: {
-        year1: { revenue: projections.reduce((s, p) => s + p.revenue, 0), customers: projections[11].customers, grossProfit: Math.round(projections.reduce((s, p) => s + p.revenue, 0) * marginPct), operatingExpenses: 180000 },
-        year2: { revenue: Math.round(projections[11].arr * 1.8), customers: Math.round(projections[11].customers * 2.2), grossProfit: Math.round(projections[11].arr * 1.8 * marginPct), operatingExpenses: 450000 },
-        year3: { revenue: Math.round(projections[11].arr * 4.5), customers: Math.round(projections[11].customers * 5.0), grossProfit: Math.round(projections[11].arr * 4.5 * marginPct), operatingExpenses: 1100000 },
+        year1: {
+          revenue: projections.reduce((s, p) => s + p.revenue, 0),
+          customers: projections[11].customers,
+          grossProfit: Math.round(projections.reduce((s, p) => s + p.revenue, 0) * marginPct),
+          operatingExpenses: 180000,
+          netIncome: Math.round(projections.reduce((s, p) => s + p.revenue, 0) * marginPct) - 180000,
+        },
+        year2: {
+          revenue: Math.round(projections[11].arr * 1.8),
+          customers: Math.round(projections[11].customers * 2.2),
+          grossProfit: Math.round(projections[11].arr * 1.8 * marginPct),
+          operatingExpenses: 450000,
+          netIncome: Math.round(projections[11].arr * 1.8 * marginPct) - 450000,
+        },
+        year3: {
+          revenue: Math.round(projections[11].arr * 4.5),
+          customers: Math.round(projections[11].customers * 5.0),
+          grossProfit: Math.round(projections[11].arr * 4.5 * marginPct),
+          operatingExpenses: 1100000,
+          netIncome: Math.round(projections[11].arr * 4.5 * marginPct) - 1100000,
+        },
       },
     }
 
