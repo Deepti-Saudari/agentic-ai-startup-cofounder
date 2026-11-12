@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { FileText, Target, TrendingUp, AlertTriangle, CheckCircle, Download, Save, RefreshCw } from "lucide-react"
+import { getApiUrl } from "@/lib/api"
 
 interface LeanCanvasData {
   problem: string
@@ -60,7 +61,7 @@ export function BusinessPlan() {
   setIsGenerating(true)
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/business-plan", {
+    const response = await fetch(getApiUrl("/business-plan"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -113,7 +114,7 @@ export function BusinessPlan() {
   const router = useRouter()
   const exportPDF = async () => {
 
-  const response = await fetch("http://127.0.0.1:8000/export-business-plan", {
+  const response = await fetch(getApiUrl("/export-business-plan"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

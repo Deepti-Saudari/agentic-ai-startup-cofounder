@@ -243,7 +243,7 @@ const generateContextualResponse = async (
   setIsTyping: (typing: boolean) => void
 ): Promise<Message> => {
   try {
-    const API_URL = "http://127.0.0.1:8000"
+    const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/+$/, "")
     const startTime = Date.now()
 
     const response = await fetch(`${API_URL}/ai-cofounder`, {

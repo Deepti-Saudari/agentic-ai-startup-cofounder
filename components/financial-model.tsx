@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
 import { Calculator, DollarSign, TrendingUp, PieChart, Download, RefreshCw } from "lucide-react"
+import { getApiUrl } from "@/lib/api"
 
 interface FinancialData {
   month: string
@@ -41,7 +42,7 @@ export function FinancialModel() {
 
   try {
 
-    const response = await fetch("http://127.0.0.1:8000/financial-model", {
+    const response = await fetch(getApiUrl("/financial-model"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

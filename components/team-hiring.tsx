@@ -28,6 +28,7 @@ import {
   Lightbulb, Sparkles as SparklesIcon, Settings, Save,
   ChevronDown, ChevronUp, Plus, Minus, Pencil
 } from "lucide-react"
+import { getApiUrl } from "@/lib/api"
 
 // ============= INTERFACES =============
 interface Skill {
@@ -349,7 +350,7 @@ export function TeamHiring() {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/team-hiring", {
+      const response = await fetch(getApiUrl("/team-hiring"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Presentation, RefreshCw, Download, Users, TrendingUp, Target, DollarSign } from "lucide-react"
+import { API_BASE } from "@/lib/api"
 
 interface PitchDeckData {
   problem: string
@@ -49,7 +50,7 @@ export function PitchDeck() {
     setHasDeck(false)
 
     try {
-      const API_URL = "http://127.0.0.1:8000"
+      const API_URL = API_BASE
       const response = await fetch(`${API_URL}/pitch-deck`, {
         method: "POST",
         headers: {

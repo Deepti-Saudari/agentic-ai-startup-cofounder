@@ -29,6 +29,7 @@ import {
   Network, Key, Bell, Sliders, Code, Terminal,
   Minus, Loader2
 } from "lucide-react"
+import { getApiUrl } from "@/lib/api"
 
 // ============= INTERFACES =============
 
@@ -296,7 +297,7 @@ export function Operations() {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/operations-plan", {
+      const response = await fetch(getApiUrl("/operations-plan"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

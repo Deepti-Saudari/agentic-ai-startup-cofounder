@@ -34,6 +34,7 @@ import {
   Briefcase,
 } from "lucide-react"
 import ReactMarkdown from "react-markdown"
+import { getApiUrl } from "@/lib/api"
 
 // Types
 interface Message {
@@ -142,7 +143,7 @@ const sendMessage = async (content: string) => {
   setIsTyping(true)
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/ai-cofounder", {
+    const response = await fetch(getApiUrl("/ai-cofounder"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: content }),
