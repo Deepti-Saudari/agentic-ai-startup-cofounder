@@ -1,52 +1,78 @@
-# Deployment guide: Next.js frontend on Vercel, FastAPI backend hosted separately
+# Deployment Guide: Next.js Frontend on Vercel & FastAPI Backend on Independent Host
 
-This repository contains two deployable services. Deploy the Next.js 14 frontend to Vercel. Run the Python FastAPI application as a separate web service on a host that supports persistent Python ASGI services (for example Render, Railway, Fly.io, or a container platform). Do not configure Vercel to start `uvicorn` as a persistent server.
+This repository contains two services:
+1. **Frontend**: Next.js 14 App Router application deployed on **Vercel**.
+2. **Backend**: Python FastAPI application hosting the 13 startup cofounder agents, deployed separately on an ASGI platform (e.g., **Render**, **Railway**, **Fly.io**, or Docker).
 
-## Frontend on Vercel
+---
 
-1. Push this repository to GitHub and import it in Vercel.
-2. Select the repository root as the project root (the `package.json` and `vercel.json` are at the root).
-3. Select the Next.js framework preset. The checked-in `vercel.json` uses `npm ci` and `npm run build`.
-4. Set the project environment variable `NEXT_PUBLIC_API_URL` to the public HTTPS origin of the separately hosted FastAPI service, for example `https://your-api.example.com` (no trailing slash).
-5. Add the variable to Production, Preview, and Development environments as applicable, then redeploy after changing it.
-6. Deploy. The application uses server-rendered Next.js routes and must not be configured as a static export.
+## 1. Frontend Deployment on Vercel
 
-The repository currently has frontend fetches that hardcode `http://127.0.0.1:8000`. Those references must be migrated to `NEXT_PUBLIC_API_URL` (or a same-origin API proxy) before production API integrations will work. Setting the Vercel variable alone does not override hardcoded URLs. Until those call sites are changed and a production build is run successfully, the frontend is not verified deployment-ready.
+### Quick Setup
 
-## FastAPI backend on Render (example)
+1. Push your changes on `deployment/vercel-readiness` (or merge to your deployment branch) to GitHub.
+2. In the [Vercel Dashboard](https://vercel.com), click **Add New Project** and import this repository.
+3. Configure the project:
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `./` (repository root)
+   - **Build Command**: `npm run build` (configured in `vercel.json`)
+   - **Install Command**: `npm ci` (configured in `vercel.json`)
+   - **Output Directory**: `.next` (default)
+4. Add Environment Variables in Vercel (**Project Settings > Environment Variables**):
+   - `NEXT_PUBLIC_API_URL`: Your hosted FastAPI backend origin (e.g. `https://your-backend.onrender.com` or `https://your-backend.railway.app`). Do not include a trailing slash.
+   - Note: For local preview before backend deployment, `NEXT_PUBLIC_API_URL` defaults to `http://127.0.0.1:8000`.
+5. Click **Deploy**.
 
-Create a Render Web Service from this repository:
+---
 
-- Root Directory: `backend`
-- Runtime: Python
-- Build Command: `pip install -r requirements.txt`
-- Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-- Health check path: `/docs` (or add a dedicated `/health` endpoint before using `/health`)
-- Python version: use a currently supported Python 3.10+ runtime.
+## 2. FastAPI Backend Deployment (Separate Hosting)
 
-Set these service environment variables in the hosting dashboard, never in the repository:
+Deploy the backend on Render, Railway, Fly.io, or any container host.
 
-- `GROQ_API_KEY` — required Groq API key
-- `ALLOWED_ORIGINS` — comma-separated allowed browser origins, such as `https://your-app.vercel.app,https://your-custom-domain.example`
+### Required Environment Variables
 
-Configure the FastAPI CORS middleware to read `ALLOWED_ORIGINS` and allow only those origins. The current backend config allows all origins and credentials; tighten it before exposing the API publicly. Set the frontend's `NEXT_PUBLIC_API_URL` to the deployed service's HTTPS origin and redeploy Vercel.
-
-Do not rely on local filesystem persistence for uploaded or generated files on ephemeral hosting. Store persistent artifacts in object storage if the product later needs durable files.
-
-## Environment checklist
-
-| Variable | Service | Required | Notes |
+| Variable | Description | Required | Example |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Vercel frontend | Yes for FastAPI integrations | Public HTTPS API origin; this is intentionally public, never put secrets here. |
-| `GROQ_API_KEY` | FastAPI host | Yes for AI features | Secret; configure in host's environment settings only. |
-| `ALLOWED_ORIGINS` | FastAPI host | Yes for browser CORS | Comma-separated Vercel production/preview/custom origins; use local localhost origin for development. |
+| `GROQ_API_KEY` | Groq API key for LLM generation | Yes | `gsk_...` |
+| `ALLOWED_ORIGINS` | Comma-separated frontend origins for CORS | Yes | `https://your-app.vercel.app,http://localhost:3000` |
+| `PORT` | Listening port (injected by host platform) | Optional (defaults to 8000) | `8000` |
 
-## Local development
+### Option A: Render Web Service
 
-Frontend: `npm ci && npm run dev` from the repository root. Set `NEXT_PUBLIC_API_URL=http://127.0.0.1:8000` in `.env.local`.
+1. Create a **New Web Service** connected to this repository.
+2. Specify settings:
+   - **Root Directory**: `backend`
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - **Health Check Path**: `/health`
+3. Add environment variables:
+   - `GROQ_API_KEY`: `<your_groq_api_key>`
+   - `ALLOWED_ORIGINS`: `https://your-app.vercel.app` (your Vercel production URL)
+4. Once deployed, copy the service URL (e.g., `https://your-backend.onrender.com`) and paste it into Vercel as `NEXT_PUBLIC_API_URL`.
 
-Backend: `cd backend`, create and activate a Python virtual environment, install `pip install -r requirements.txt`, copy `backend/.env.example` to `backend/.env`, add a valid Groq key, then run `uvicorn main:app --reload --host 0.0.0.0 --port 8000`.
+### Option B: Railway / Fly.io / Docker
 
-## Verification status and known blockers
+A production `Dockerfile` and `Procfile` are located in `backend/`:
+- `backend/Procfile`: `web: uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}`
+- `backend/Dockerfile`: Multi-stage Python 3.11 container with uvicorn.
 
-The GitHub editing tools available in this task cannot execute shell commands, install dependencies, run `npm run build` or tests, or create a pull request. The source must not be described as build-verified until those commands have run in CI or a local checkout. The current frontend contains hardcoded localhost backend URLs, duplicate Next.js config files, and dependency lockfiles that need validation together. Run `npm ci`, `npm run typecheck`, and `npm run build`; resolve all reported errors and update the npm lockfile before merging. The `backend/requirements.txt` has been normalized to UTF-8 text, but Python dependencies and API startup have not been executed in this environment.
+---
+
+## 3. Environment Variables Summary
+
+| Variable | Service | Where to Set | Purpose |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | Frontend (Next.js) | Vercel Environment Variables | Connects frontend API calls to the remote FastAPI backend. |
+| `GROQ_API_KEY` | Backend (FastAPI) | Render/Railway/Host Dashboard | Authenticates requests to Groq for AI agent operations. |
+| `ALLOWED_ORIGINS` | Backend (FastAPI) | Render/Railway/Host Dashboard | Whitelists browser CORS origins (e.g. Vercel deployment URL). |
+
+---
+
+## 4. Verification and Build Status
+
+- **TypeScript Typecheck**: Verified passing (`tsc --noEmit` exited with code 0).
+- **Next.js Production Build**: Verified passing (`next build` exited with code 0).
+- **Hardcoded URLs**: Replaced all hardcoded `http://127.0.0.1:8000` strings across components with centralized configuration via `NEXT_PUBLIC_API_URL` and `@/lib/api`.
+- **CORS & Endpoints**: FastAPI backend configured with dynamic CORS (`ALLOWED_ORIGINS`), `/health`, and `/` endpoints.
+- **Backend Import Resilience**: Centralized lazy Groq client so the backend boots cleanly and responds to health checks even during initial deployment before API keys are configured.

@@ -18,6 +18,7 @@ import {
   Rocket, Heart, Star, Flag, Filter, Layers,
   AlertCircle
 } from "lucide-react"
+import { API_BASE } from "@/lib/api"
 
 interface Milestone {
   milestone: string;
@@ -126,7 +127,7 @@ export function MarketingStrategy() {
     setError(null);
 
     try {
-      const API_URL = "http://127.0.0.1:8000";
+      const API_URL = API_BASE;
       const response = await fetch(`${API_URL}/marketing-strategy`, {
         method: "POST",
         headers: {

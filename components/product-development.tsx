@@ -16,6 +16,7 @@ import {
   Zap, Shield, TrendingUp, Target, Brain, Cpu,
   GanttChart, LineChart, Boxes, Network
 } from "lucide-react"
+import { API_BASE } from "@/lib/api"
 
 interface ProductDevData {
   mvp_features: {
@@ -164,7 +165,7 @@ export function ProductDevelopment() {
     setTaskCompletion({});
 
     try {
-      const API_URL = "http://127.0.0.1:8000";
+      const API_URL = API_BASE;
       const response = await fetch(`${API_URL}/product-development`, {
         method: "POST",
         headers: {

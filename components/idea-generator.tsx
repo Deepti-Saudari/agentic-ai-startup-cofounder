@@ -16,8 +16,9 @@ import {
   History, Network, Microscope, Scale, Globe, Target, Rocket,
   Zap, Shield, Award
 } from "lucide-react"
+import { API_BASE } from "@/lib/api"
 
-const API_BASE_URL = "http://127.0.0.1:8000"
+const API_BASE_URL = API_BASE
 
 const getSafeString = (value) => {
   if (!value) return ""

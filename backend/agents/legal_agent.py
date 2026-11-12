@@ -5,7 +5,10 @@ import json  # Add this import
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+try:
+    from config import client
+except ImportError:
+    from backend.config import client
 
 def generate_legal_document(template_name, form_data):
     prompt = f"""

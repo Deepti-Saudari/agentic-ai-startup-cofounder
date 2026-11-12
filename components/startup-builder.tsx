@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getApiUrl } from "@/lib/api"
 
 export default function StartupBuilder() {
 
@@ -15,7 +16,7 @@ export default function StartupBuilder() {
 
     try {
 
-      const response = await fetch("http://127.0.0.1:8000/startup-builder", {
+      const response = await fetch(getApiUrl("/startup-builder"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

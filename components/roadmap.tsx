@@ -55,6 +55,7 @@ import {
   AlertCircle,
   CheckSquare
 } from "lucide-react"
+import { getApiUrl } from "@/lib/api"
 
 // ============= INTERFACES =============
 interface Task {
@@ -558,7 +559,7 @@ export function Roadmap() {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/startup-roadmap", {
+      const response = await fetch(getApiUrl("/startup-roadmap"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

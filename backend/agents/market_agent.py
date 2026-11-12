@@ -6,7 +6,10 @@ import json
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+try:
+    from config import client
+except ImportError:
+    from backend.config import client
 
 
 def run_market_research(industry, target_market):

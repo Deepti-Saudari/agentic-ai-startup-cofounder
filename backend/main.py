@@ -30,16 +30,59 @@ from agents.operations_agent import generate_operations_plan
 from agents.cofounder_agent import ai_cofounder_chat
 from orchestrator.startup_orchestrator import run_startup_builder
 
-app = FastAPI()
+import os
+from dotenv import load_dotenv
 
-# Add CORS middleware (only once is enough)
+load_dotenv()
+
+app = FastAPI(
+    title="AI Startup Co-founder API",
+    description="Agentic backend powering AI Startup Co-founder",
+    version="1.0.0",
+)
+
+# Configure CORS origins from environment variable
+raw_origins = os.getenv("ALLOWED_ORIGINS", "")
+if raw_origins.strip() == "*":
+    allow_origins = ["*"]
+    allow_credentials = False
+elif raw_origins.strip():
+    allow_origins = [orig.strip() for orig in raw_origins.split(",") if orig.strip()]
+    allow_credentials = True
+else:
+    # Default for local development
+    allow_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
+    allow_credentials = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=allow_origins,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "message": "AI Startup Co-founder API is running",
+        "docs_url": "/docs",
+        "health_url": "/health",
+    }
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "agentic-ai-startup-cofounder-backend",
+        "groq_configured": bool(os.getenv("GROQ_API_KEY")),
+    }
 
 # -------- IDEA GENERATOR --------
 
