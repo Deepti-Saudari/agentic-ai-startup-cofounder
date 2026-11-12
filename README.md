@@ -23,6 +23,15 @@
 
 Transform startup ideas into investor-ready businesses using **13 Specialized AI Agents**.
 
+<br/>
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Open_Application-059669?style=for-the-badge&logo=vercel&logoColor=white)](https://agentic-ai-startup-cofounder.vercel.app)
+[![Deploy with Vercel](https://img.shields.io/badge/Deploy_on-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDeepti-Saudari%2Fagentic-ai-startup-cofounder)
+
+<p>
+  <a href="https://agentic-ai-startup-cofounder.vercel.app"><strong>🔗 Launch Live Web App »</strong></a>
+</p>
+
 <p>
 
 <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
@@ -184,6 +193,18 @@ agentic-ai-startup-cofounder/
 ```
 
 ---
+# 🌐 Live Deployment & Demo
+
+| Service | Platform | Status | Access Link |
+|:---|:---|:---|:---|
+| **Frontend Web App** | Vercel | Production Ready | [**agentic-ai-startup-cofounder.vercel.app**](https://agentic-ai-startup-cofounder.vercel.app) |
+| **FastAPI Backend** | Render / Railway | ASGI Web Service | [Step-by-step Setup Guide](./VERCEL_DEPLOYMENT.md) |
+| **Interactive API Docs** | Swagger / OpenAPI | Integrated | `/docs` on backend host |
+
+> 📖 For full cloud hosting instructions, environment variables, and architecture details, refer to the **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)**.
+
+---
+
 # 🚀 Getting Started
 
 ## Prerequisites
