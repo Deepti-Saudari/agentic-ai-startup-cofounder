@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const body = await req.json().catch(() => ({}));
     const templateName = body.template_name || body.template || "Founders Agreement";
     const startupName = body.startup_name || body.formData?.startup_name || "Venture Inc.";
@@ -42,7 +43,7 @@ Instructions:
     const raw = await chatCompletion([
       { role: "system", content: "You are an expert corporate legal counsel drafting binding startup agreements in clean HTML." },
       { role: "user", content: prompt },
-    ]);
+    ], { apiKey: userApiKey, max_tokens: 3500 });
 
     let documentHtml = raw.replace(/^```html\s*/i, "").replace(/^```\s*/, "").replace(/```$/, "").trim();
 

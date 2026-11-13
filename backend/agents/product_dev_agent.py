@@ -7,9 +7,9 @@ import re
 load_dotenv()
 
 try:
-    from config import client
+    from config import client, extract_json
 except ImportError:
-    from backend.config import client
+    from backend.config import client, extract_json
 
 
 def generate_product_plan(startup_idea, industry):
@@ -45,13 +45,18 @@ Return JSON only.
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}]
+        temperature=0.7,
+        max_tokens=3000,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": "You are a startup product manager. Output pure valid JSON."},
+            {"role": "user", "content": prompt}
+        ]
     )
 
     text = response.choices[0].message.content.strip()
+    result = extract_json(text)
+    if result and isinstance(result, dict) and "mvp_features" in result:
+        return result
 
-    try:
-        text = re.sub(r"```json|```", "", text)
-        return json.loads(text)
-    except:
-        return {"raw_output": text}
+    return {"raw_output": text}

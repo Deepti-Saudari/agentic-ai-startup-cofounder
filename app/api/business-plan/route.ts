@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 import { callGroq } from "@/lib/groq"
 
+export const runtime = "nodejs"
+
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const { startup_idea } = await req.json()
     const idea = startup_idea || "AI-powered B2B SaaS platform"
 
@@ -77,6 +80,7 @@ Return ONLY valid JSON matching this exact structure:
       systemPrompt: "You are an elite VC venture partner and startup strategist. Return strictly valid JSON.",
       jsonMode: true,
       maxTokens: 3000,
+      apiKey: userApiKey,
       fallbackData: fallbackPlan,
     })
 

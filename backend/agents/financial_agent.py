@@ -7,9 +7,9 @@ import re
 load_dotenv()
 
 try:
-    from config import client
+    from config import client, extract_json
 except ImportError:
-    from backend.config import client
+    from backend.config import client, extract_json
 
 
 def generate_financial_model(startup_idea, growth_rate, arpu, cac, churn, margin):
@@ -90,17 +90,20 @@ Rules:
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         temperature=0.7,
-        messages=[{"role": "user", "content": prompt}]
+        max_tokens=3000,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": "You are a startup financial modeler. Output pure valid JSON."},
+            {"role": "user", "content": prompt}
+        ]
     )
 
     text = response.choices[0].message.content.strip()
+    result = extract_json(text)
+    if result and isinstance(result, dict) and "metrics" in result:
+        return result
 
-    try:
-        text = re.sub(r"```json|```", "", text)
-        return json.loads(text)
-
-    except Exception as e:
-        return {
-            "error": str(e),
-            "raw_output": text
-        }
+    return {
+        "error": "Failed to parse financial model JSON",
+        "raw_output": text
+    }

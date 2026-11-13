@@ -5,7 +5,7 @@ backend_dir = os.path.dirname(os.path.abspath(__file__))
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
-from fastapi import FastAPI, Body, HTTPException
+from fastapi import FastAPI, Body, HTTPException, Request
 from fastapi.responses import Response, FileResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,9 +39,9 @@ from agents.cofounder_agent import ai_cofounder_chat
 from orchestrator.startup_orchestrator import run_startup_builder
 
 try:
-    from config import client, clean_api_key
+    from config import client, clean_api_key, request_groq_key
 except ImportError:
-    from backend.config import client, clean_api_key
+    from backend.config import client, clean_api_key, request_groq_key
 
 load_dotenv()
 
@@ -68,6 +68,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def extract_api_key_middleware(request: Request, call_next):
+    req_key = request.headers.get("x-groq-api-key")
+    if req_key:
+        request_groq_key.set(req_key)
+    response = await call_next(request)
+    return response
+
 @app.get("/")
 def root():
     return {
@@ -79,8 +87,9 @@ def root():
     }
 
 @app.get("/health")
-def health_check():
-    raw_key = os.getenv("GROQ_API_KEY", "")
+def health_check(request: Request):
+    req_key = request.headers.get("x-groq-api-key")
+    raw_key = req_key or os.getenv("GROQ_API_KEY", "")
     api_key = clean_api_key(raw_key)
     has_key = bool(api_key)
     masked = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else ("Configured" if has_key else "Missing")
@@ -94,21 +103,23 @@ def health_check():
     }
 
 @app.get("/test-groq")
-def test_groq():
+def test_groq(request: Request, key: Optional[str] = None):
     """Live diagnostic endpoint to verify Groq connectivity from Render or any host."""
-    raw_key = os.getenv("GROQ_API_KEY", "")
-    api_key = clean_api_key(raw_key)
+    req_key = key or request.headers.get("x-groq-api-key") or os.getenv("GROQ_API_KEY", "")
+    api_key = clean_api_key(req_key)
 
     if not api_key:
         return {
             "success": False,
             "status": "error",
             "message": "GROQ_API_KEY is not configured.",
-            "action_required": "In Render Dashboard: Click your Service -> Environment -> add GROQ_API_KEY with your key from https://console.groq.com/keys",
+            "action_required": "Provide your Groq API key in the UI settings dialog or in your hosting dashboard environment variables.",
         }
 
     try:
-        response = client.chat.completions.create(
+        from groq import Groq
+        test_client = Groq(api_key=api_key)
+        response = test_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": "Respond with the single word: READY"}],
             max_tokens=10,
@@ -196,8 +207,8 @@ async def idea_generator(data: IdeaRequest):
 # -------- MARKET RESEARCH --------
 
 class MarketRequest(BaseModel):
-    industry: str
-    target_market: str
+    industry: str = "Technology / SaaS"
+    target_market: str = "Global Tech Founders"
 
 @app.post("/market-research")
 def market_research(data: MarketRequest):
@@ -233,7 +244,7 @@ def market_research(data: MarketRequest):
 # -------- BUSINESS PLANNER --------
 
 class BusinessPlanRequest(BaseModel):
-    startup_idea: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
 
 @app.post("/business-plan")
 def business_plan(data: BusinessPlanRequest):
@@ -276,12 +287,12 @@ def business_plan(data: BusinessPlanRequest):
 # -------- FINANCE MODEL --------
 
 class FinancialRequest(BaseModel):
-    startup_idea: str
-    growth_rate: str
-    arpu: str
-    cac: str
-    churn: str
-    margin: str
+    startup_idea: str = "AI-powered B2B SaaS"
+    growth_rate: str = "15"
+    arpu: str = "100"
+    cac: str = "250"
+    churn: str = "5"
+    margin: str = "80"
 
 @app.post("/financial-model")
 def financial_model(data: FinancialRequest):
@@ -423,8 +434,8 @@ async def export_legal_pdf(data: dict = Body(...)):
 # -------- PITCH DECK --------
 
 class PitchRequest(BaseModel):
-    startup_idea: str
-    target_market: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    target_market: str = "Global Tech Founders"
 
 @app.post("/pitch-deck")
 def pitch_deck(data: PitchRequest):
@@ -449,8 +460,8 @@ def pitch_deck(data: PitchRequest):
 # -------- PRODUCT DEVELOPMENT --------
 
 class ProductDevRequest(BaseModel):
-    startup_idea: str
-    industry: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    industry: str = "Software & Technology"
 
 @app.post("/product-development")
 def product_development(data: ProductDevRequest):
@@ -473,8 +484,8 @@ def product_development(data: ProductDevRequest):
 # -------- MARKETING STRATEGY --------
 
 class MarketingRequest(BaseModel):
-    startup_idea: str
-    industry: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    industry: str = "Software & Technology"
 
 @app.post("/marketing-strategy")
 def marketing_strategy(data: MarketingRequest):
@@ -498,8 +509,8 @@ def marketing_strategy(data: MarketingRequest):
 # -------- FUNDING STRATEGY & INVESTORS --------
 
 class FundingRequest(BaseModel):
-    startup_idea: str
-    industry: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    industry: str = "Software & Technology"
 
 @app.post("/funding-strategy")
 def funding_strategy(data: FundingRequest):
@@ -576,8 +587,8 @@ def investors_endpoint(data: dict = Body(...)):
 # -------- TEAM & HIRING --------
 
 class TeamRequest(BaseModel):
-    startup_idea: str
-    industry: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    industry: str = "Software & Technology"
 
 @app.post("/team-hiring")
 def team_hiring(data: TeamRequest):
@@ -599,8 +610,8 @@ def team_hiring(data: TeamRequest):
 # -------- ROADMAP --------
 
 class RoadmapRequest(BaseModel):
-    startup_idea: str
-    industry: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    industry: str = "Software & Technology"
 
 @app.post("/startup-roadmap")
 def roadmap(data: RoadmapRequest):
@@ -622,8 +633,8 @@ def roadmap(data: RoadmapRequest):
 # -------- OPERATIONS --------
 
 class OperationsRequest(BaseModel):
-    startup_idea: str
-    industry: str
+    startup_idea: str = "AI-powered B2B SaaS platform"
+    industry: str = "Software & Technology"
 
 @app.post("/operations-plan")
 def operations(data: OperationsRequest):
@@ -654,7 +665,7 @@ def operations(data: OperationsRequest):
 # -------- AI-COFOUNDER-CHAT --------
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = "Hello"
 
 @app.post("/ai-cofounder")
 def cofounder_chat(data: ChatRequest):
@@ -670,9 +681,9 @@ def cofounder_chat(data: ChatRequest):
 # -------- ORCHESTRATION --------
 
 class StartupBuilderRequest(BaseModel):
-    skills: str
-    interests: str
-    experience: str
+    skills: str = "Software & AI"
+    interests: str = "B2B SaaS"
+    experience: str = "Technical Founder"
 
 @app.post("/startup-builder")
 def startup_builder(data: StartupBuilderRequest):

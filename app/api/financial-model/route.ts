@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 import { callGroq } from "@/lib/groq"
 
+export const runtime = "nodejs"
+
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const {
       startup_idea = "B2B SaaS",
       growth_rate = "15",
@@ -43,9 +46,9 @@ Return ONLY valid JSON matching this schema:
     }
   ],
   "yearly_projection": {
-    "year1": { "revenue": 120000, "customers": 180, "grossProfit": 96000, "operatingExpenses": 180000 },
-    "year2": { "revenue": 550000, "customers": 600, "grossProfit": 440000, "operatingExpenses": 420000 },
-    "year3": { "revenue": 1850000, "customers": 1800, "grossProfit": 1480000, "operatingExpenses": 950000 }
+    "year1": { "revenue": 120000, "customers": 180, "grossProfit": 96000, "operatingExpenses": 180000, "netIncome": -84000 },
+    "year2": { "revenue": 550000, "customers": 600, "grossProfit": 440000, "operatingExpenses": 420000, "netIncome": 20000 },
+    "year3": { "revenue": 1850000, "customers": 1800, "grossProfit": 1480000, "operatingExpenses": 950000, "netIncome": 530000 }
   }
 }`
 
@@ -112,6 +115,7 @@ Return ONLY valid JSON matching this schema:
       systemPrompt: "You are a Wall Street & Silicon Valley startup financial modeler. Return strictly valid JSON.",
       jsonMode: true,
       maxTokens: 2500,
+      apiKey: userApiKey,
       fallbackData: fallbackFinancials,
     })
 

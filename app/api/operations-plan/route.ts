@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const body = await req.json().catch(() => ({}));
     const startupIdea = body.startup_idea || body.startupIdea || "AI SaaS platform";
     const industry = body.industry || "Software & Technology";
@@ -50,7 +51,7 @@ Only return pure JSON. No markdown or explanation.`;
     const raw = await chatCompletion([
       { role: "system", content: "You are an expert startup operations consultant who always returns raw valid JSON." },
       { role: "user", content: prompt },
-    ]);
+    ], { apiKey: userApiKey, max_tokens: 3000 });
 
     const parsed = parseJsonCompletion<any>(raw, {
       operations_structure: {

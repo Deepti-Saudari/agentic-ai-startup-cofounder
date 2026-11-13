@@ -8,9 +8,9 @@ from datetime import datetime
 load_dotenv()
 
 try:
-    from config import client
+    from config import client, extract_json
 except ImportError:
-    from backend.config import client
+    from backend.config import client, extract_json
 
 def generate_startup_ideas(skills, interests, experience, idea=None, mode="generate"):
     """
@@ -219,34 +219,18 @@ IMPORTANT:
                 {"role": "system", "content": "You are a world-class VC analyst and startup strategist. Generate ONLY valid JSON with deep, specific insights. No markdown, no explanations."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.9,
-            max_tokens=8000
+            temperature=0.7,
+            max_tokens=3500,
+            response_format={"type": "json_object"}
         )
 
         content = response.choices[0].message.content.strip()
-        
-        # Clean the response
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
-
-        result = json.loads(content)
-        
-        # Validate we have at least 3 ideas
-        if len(result.get("ideas", [])) < 3:
-            print("Warning: Less than 3 ideas generated")
+        result = extract_json(content)
+        if result is None:
+            raise Exception("Failed to parse AI response into structured JSON")
             
         return result
 
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error: {e}")
-        print(f"Raw content preview: {content[:500]}")
-        raise Exception(f"Failed to parse AI response: {str(e)}")
-        
     except Exception as e:
         print(f"Error generating ideas: {e}")
         raise Exception(f"AI service error: {str(e)}")

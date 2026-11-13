@@ -18,6 +18,10 @@ import {
   ExternalLink,
   Check,
   XCircle,
+  Key,
+  Eye,
+  EyeOff,
+  Cpu,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { Input } from "@/components/ui/input"
@@ -41,72 +45,76 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useStartup } from "@/context/startup-context"
-import { getApiUrl, getBaseApiUrl } from "@/lib/api"
+import { getApiUrl, getBaseApiUrl, getStoredGroqKey, setStoredGroqKey, apiFetch } from "@/lib/api"
 
 const pageNames: Record<string, { title: string; description: string }> = {
   "/": {
     title: "Command Center",
     description: "Multi-agent startup orchestration and overview",
   },
-  "/ideas": {
-    title: "Idea Generator",
-    description: "Generate and evaluate strategic venture opportunities",
+  "/ai-cofounder": {
+    title: "AI Co-Founder",
+    description: "24/7 strategic advisor, feedback, and execution guidance",
   },
-  "/market": {
-    title: "Market Research",
-    description: "Competitor intelligence, personas, and market sizing",
+  "/idea-generator": {
+    title: "Idea Generator & Evaluator",
+    description: "Deep venture opportunity discovery and 8-layer strategic scoring",
+  },
+  "/market-research": {
+    title: "Market Research & Competitors",
+    description: "Competitive intelligence, customer personas, and industry trends",
   },
   "/business-plan": {
-    title: "Business Plan",
-    description: "Lean canvas, SWOT analysis, and executive strategy",
+    title: "Business Plan & Lean Canvas",
+    description: "Live 9-block Lean Canvas, SWOT analysis, and printable PDF plan",
   },
-  "/financials": {
-    title: "Financial Model",
-    description: "Unit economics, cash runway, and revenue projections",
-  },
-  "/legal": {
-    title: "Legal Documents",
-    description: "Founders agreements, NDAs, and contract generation",
+  "/financial-model": {
+    title: "Financial Model & Projections",
+    description: "Dynamic unit economics, interactive runway, and 3-year ARR forecasts",
   },
   "/pitch-deck": {
-    title: "Pitch Deck",
-    description: "Investor presentation slides and narrative structure",
+    title: "Pitch Deck Narrative Architect",
+    description: "VC-grade 9-slide investor storyline with slide-by-slide copy",
   },
-  "/product": {
-    title: "Product Development",
-    description: "MVP feature scope, tech stack, and sprint planning",
+  "/product-development": {
+    title: "Product Roadmap & Tech Stack",
+    description: "MVP feature prioritization, architecture choices, and development phases",
   },
-  "/marketing": {
-    title: "Marketing Strategy",
-    description: "Go-to-market channels, CAC, and acquisition loops",
+  "/marketing-strategy": {
+    title: "Marketing & GTM Strategy",
+    description: "Multi-channel customer acquisition funnels and launch milestones",
   },
-  "/funding": {
-    title: "Funding Strategy",
-    description: "Cap table, investor matching, and valuation models",
+  "/funding-strategy": {
+    title: "Funding Strategy & Investor Finder",
+    description: "Capital requirements, valuation benchmarks, and matched active investors",
   },
-  "/team": {
-    title: "Team & Hiring",
-    description: "Organizational design, role profiles, and compensation",
+  "/team-hiring": {
+    title: "Team Structure & Hiring Plan",
+    description: "Core founding team sequence, compensation, and equity guidelines",
   },
   "/roadmap": {
-    title: "Startup Roadmap",
-    description: "Milestone execution, quarterly goals, and KPI tracking",
+    title: "Execution Roadmap",
+    description: "Timeline orchestration, milestone progress, and venture risk tracker",
   },
   "/operations": {
-    title: "Operations & Scaling",
-    description: "Operating system, tools stack, and risk management",
+    title: "Operations & Governance",
+    description: "Team workflows, cloud infrastructure, and operational KPIs",
   },
-  "/chat": {
-    title: "AI Co-Founder Chat",
-    description: "Real-time strategic guidance and venture decision support",
+  "/startup-builder": {
+    title: "One-Click Startup Builder",
+    description: "Generate end-to-end launch plan in a single autonomous run",
+  },
+  "/legal-documents": {
+    title: "Legal & Corporate Generator",
+    description: "Founder agreements, NDAs, and corporate resolutions with PDF export",
   },
 }
 
 export function DashboardHeader() {
   const pathname = usePathname()
   const pageInfo = pageNames[pathname] || {
-    title: "Dashboard",
-    description: "Your startup command center",
+    title: "AI Startup Co-Founder",
+    description: "Your autonomous venture building companion",
   }
 
   const { project, updateProject, resetProject, exportProjectJson, importProjectJson, isHydrated } =
@@ -118,17 +126,38 @@ export function DashboardHeader() {
   const [inputUrl, setInputUrl] = useState("")
   const [isTesting, setIsTesting] = useState(false)
   const [diagnosticResult, setDiagnosticResult] = useState<any>(null)
+
+  // Groq API Key state
+  const [groqKey, setGroqKey] = useState("")
+  const [showGroqKey, setShowGroqKey] = useState(false)
+  const [isTestingGroq, setIsTestingGroq] = useState(false)
+  const [groqStatusMsg, setGroqStatusMsg] = useState<{ text: string; ok: boolean } | null>(null)
+  const [serverGroqConfigured, setServerGroqConfigured] = useState(false)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const hasLiveGroq = Boolean(groqKey || serverGroqConfigured)
 
   const checkBackend = async () => {
     try {
       const currentUrl = getBaseApiUrl()
       setActiveBackendUrl(currentUrl)
 
-      // Increased timeout to 12s so Render cold-starts don't instantly show false offline
-      const res = await fetch(getApiUrl("/health"), { signal: AbortSignal.timeout(12000) })
+      const stored = getStoredGroqKey()
+      const headers: Record<string, string> = {}
+      if (stored) headers["x-groq-api-key"] = stored
+
+      const res = await fetch(getApiUrl("/health"), {
+        signal: AbortSignal.timeout(12000),
+        headers,
+      })
+
       if (res.ok) {
         setBackendStatus("online")
+        const data = await res.json().catch(() => ({}))
+        if (data.groq_configured) {
+          setServerGroqConfigured(true)
+        }
       } else {
         setBackendStatus("offline")
       }
@@ -138,13 +167,77 @@ export function DashboardHeader() {
   }
 
   useEffect(() => {
-    checkBackend()
     if (typeof window !== "undefined") {
       setInputUrl(localStorage.getItem("ai_startup_custom_backend") || "")
+      setGroqKey(getStoredGroqKey())
     }
+    checkBackend()
     const timer = setInterval(checkBackend, 30000)
     return () => clearInterval(timer)
   }, [])
+
+  const handleTestGroqKey = async () => {
+    const key = groqKey.trim()
+    if (!key) {
+      setGroqStatusMsg({
+        text: "Please enter your Groq API key before testing.",
+        ok: false,
+      })
+      return
+    }
+
+    setIsTestingGroq(true)
+    setGroqStatusMsg(null)
+
+    try {
+      const res = await apiFetch("/test-groq", {
+        method: "POST",
+        headers: { "x-groq-api-key": key },
+        body: JSON.stringify({ key }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (res.ok && data.success) {
+        setStoredGroqKey(key)
+        setGroqStatusMsg({
+          text: data.message || "Groq connection verified! Live AI responses are active.",
+          ok: true,
+        })
+        setServerGroqConfigured(true)
+      } else {
+        setGroqStatusMsg({
+          text: data.message || `Groq test failed (HTTP ${res.status}). Verify your key at console.groq.com.`,
+          ok: false,
+        })
+      }
+    } catch (err: any) {
+      setGroqStatusMsg({
+        text: err?.message || "Failed to reach test endpoint. Make sure your network or backend is online.",
+        ok: false,
+      })
+    } finally {
+      setIsTestingGroq(false)
+    }
+  }
+
+  const handleSaveGroqKeyOnly = () => {
+    const key = groqKey.trim()
+    setStoredGroqKey(key)
+    setGroqStatusMsg({
+      text: key ? "Groq key saved in browser storage." : "Groq key cleared. Running in demo fallback mode.",
+      ok: true,
+    })
+  }
+
+  const handleClearGroqKey = () => {
+    setStoredGroqKey("")
+    setGroqKey("")
+    setGroqStatusMsg({
+      text: "Groq key removed. Operating in demo fallback mode.",
+      ok: false,
+    })
+  }
 
   const handleTestAndConnect = async () => {
     setIsTesting(true)
@@ -152,10 +245,18 @@ export function DashboardHeader() {
 
     const targetUrl = inputUrl.trim().replace(/\/+$/, "")
     const healthEndpoint = targetUrl ? `${targetUrl}/health` : "/api/health"
-    const groqTestEndpoint = targetUrl ? `${targetUrl}/test-groq` : "/api/health"
+    const groqTestEndpoint = targetUrl ? `${targetUrl}/test-groq` : "/api/test-groq"
+
+    const headers: Record<string, string> = {}
+    if (groqKey.trim()) {
+      headers["x-groq-api-key"] = groqKey.trim()
+    }
 
     try {
-      const healthRes = await fetch(healthEndpoint, { signal: AbortSignal.timeout(15000) })
+      const healthRes = await fetch(healthEndpoint, {
+        signal: AbortSignal.timeout(15000),
+        headers,
+      })
       if (!healthRes.ok) {
         throw new Error(`Endpoint returned HTTP ${healthRes.status}`)
       }
@@ -163,7 +264,10 @@ export function DashboardHeader() {
 
       let groqData = null
       try {
-        const groqRes = await fetch(groqTestEndpoint, { signal: AbortSignal.timeout(15000) })
+        const groqRes = await fetch(groqTestEndpoint, {
+          signal: AbortSignal.timeout(15000),
+          headers,
+        })
         if (groqRes.ok) {
           groqData = await groqRes.json()
         }
@@ -189,7 +293,7 @@ export function DashboardHeader() {
       setDiagnosticResult({
         success: false,
         error: err?.message || "Failed to reach backend",
-        suggestion: "If using Render, it may be waking up from sleep (wait 40s) or check your Render URL.",
+        suggestion: "If using Render, it may be waking up from sleep (wait ~40s) or check your Render URL.",
       })
       setBackendStatus("offline")
     } finally {
@@ -250,21 +354,30 @@ export function DashboardHeader() {
 
         {/* Right Header Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Storage & Backend Status */}
+          {/* AI Mode & Backend Status Indicators */}
           <div className="hidden md:flex items-center gap-2">
-            {/* Storage Auto-Save Indicator */}
-            <Badge
+            {/* Live Groq AI Indicator Button */}
+            <Button
               variant="outline"
-              className="gap-1.5 text-[11px] font-normal border-border/80 bg-muted/30"
-              title={
-                project.lastSavedAt
-                  ? `Saved locally at ${new Date(project.lastSavedAt).toLocaleTimeString()}`
-                  : "Auto-saves locally in browser"
-              }
+              size="sm"
+              onClick={() => setModalOpen(true)}
+              className={`h-7 px-2.5 gap-1.5 text-[11px] font-medium border ${
+                hasLiveGroq
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+                  : "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+              }`}
+              title="Click to configure or test your Groq API Key"
             >
-              <Database className="w-3 h-3 text-primary" />
-              <span>Auto-saved</span>
-            </Badge>
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  hasLiveGroq
+                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]"
+                    : "bg-amber-500 animate-pulse"
+                }`}
+              />
+              <Cpu className="w-3 h-3" />
+              <span>{hasLiveGroq ? "Groq Live AI" : "AI: Demo Mode (Add Key)"}</span>
+            </Button>
 
             {/* Backend Connectivity Status Button */}
             <Button
@@ -288,6 +401,20 @@ export function DashboardHeader() {
               </span>
               <Settings className="w-3 h-3 text-muted-foreground ml-0.5" />
             </Button>
+
+            {/* Storage Auto-Save Indicator */}
+            <Badge
+              variant="outline"
+              className="gap-1.5 text-[11px] font-normal border-border/80 bg-muted/30"
+              title={
+                project.lastSavedAt
+                  ? `Saved locally at ${new Date(project.lastSavedAt).toLocaleTimeString()}`
+                  : "Auto-saves locally in browser"
+              }
+            >
+              <Database className="w-3 h-3 text-primary" />
+              <span>Auto-saved</span>
+            </Badge>
           </div>
 
           {/* Project Persistence Actions Dropdown */}
@@ -348,34 +475,132 @@ export function DashboardHeader() {
         </div>
       </div>
 
-      {/* Backend API Configuration & Diagnostics Dialog */}
+      {/* Backend API Configuration & AI Diagnostics Dialog */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
-              <Server className="w-4 h-4 text-primary" /> Backend API & AI Diagnostics
+              <Cpu className="w-4 h-4 text-primary" /> AI Engine & Backend Diagnostics
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Configure where the frontend routes AI requests (Render FastAPI or built-in Vercel functions).
+              Configure your Groq API key for live dynamic AI generation and set your backend destination.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            {/* Section 1: Groq API Key Configuration */}
+            <div className="p-3.5 rounded-lg border border-border/70 bg-muted/20 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-primary" /> Groq API Key (Live AI)
+                </label>
+                <Badge
+                  variant={hasLiveGroq ? "default" : "secondary"}
+                  className={`text-[10px] ${
+                    hasLiveGroq ? "bg-emerald-600 text-white" : "bg-amber-500/20 text-amber-700 dark:text-amber-300"
+                  }`}
+                >
+                  {hasLiveGroq ? "Live AI Active" : "Demo Fallback Mode"}
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showGroqKey ? "text" : "password"}
+                    placeholder="gsk_..."
+                    value={groqKey}
+                    onChange={(e) => setGroqKey(e.target.value)}
+                    className="text-xs h-9 font-mono pr-8"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowGroqKey(!showGroqKey)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    title={showGroqKey ? "Hide key" : "Show key"}
+                  >
+                    {showGroqKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleTestGroqKey}
+                  disabled={isTestingGroq || !groqKey.trim()}
+                  className="text-xs h-9 font-medium gap-1 shrink-0"
+                >
+                  {isTestingGroq ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-3 h-3" />
+                      Test & Save
+                    </>
+                  )}
+                </Button>
+
+                {groqKey && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleClearGroqKey}
+                    className="text-xs h-9 text-muted-foreground hover:text-destructive px-2 shrink-0"
+                    title="Remove key"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+
+              {groqStatusMsg && (
+                <div
+                  className={`text-[11px] p-2 rounded border leading-tight ${
+                    groqStatusMsg.ok
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                      : "bg-destructive/10 border-destructive/30 text-destructive"
+                  }`}
+                >
+                  {groqStatusMsg.text}
+                </div>
+              )}
+
+              <p className="text-[11px] text-muted-foreground flex items-center justify-between">
+                <span>Your key is stored only in your browser and passed to Groq via encrypted headers.</span>
+                <a
+                  href="https://console.groq.com/keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-0.5 ml-1 shrink-0"
+                >
+                  Get free Groq key <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </p>
+            </div>
+
+            {/* Section 2: Backend URL Configuration */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground">Active Backend URL</label>
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Server className="w-3.5 h-3.5 text-primary" /> Backend API URL (Optional)
+                </label>
                 <Badge variant={backendStatus === "online" ? "default" : "secondary"} className="text-[10px]">
-                  {backendStatus === "online" ? "Connected" : "Offline"}
+                  {backendStatus === "online" ? "Online" : "Offline"}
                 </Badge>
               </div>
               <Input
-                placeholder="https://your-backend.onrender.com (or leave empty for /api)"
+                placeholder="https://your-backend.onrender.com (or leave empty for built-in /api)"
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 className="text-xs h-9 font-mono"
               />
               <p className="text-[11px] text-muted-foreground">
-                Paste your live Render URL (e.g. <code className="text-[10px] bg-muted px-1 py-0.5 rounded">https://agentic-ai-startup-cofounder-backend.onrender.com</code>).
+                Leave empty to use built-in Next.js serverless routes, or paste your Render FastAPI service URL.
               </p>
             </div>
 
@@ -394,7 +619,7 @@ export function DashboardHeader() {
                   ) : (
                     <XCircle className="w-4 h-4 text-destructive" />
                   )}
-                  <span>{diagnosticResult.success ? "Connection Verified!" : "Connection Failed"}</span>
+                  <span>{diagnosticResult.success ? "Backend Connection Verified!" : "Backend Connection Failed"}</span>
                 </div>
                 <p className="text-[11px] leading-relaxed">
                   {diagnosticResult.message || diagnosticResult.error}
@@ -421,7 +646,7 @@ export function DashboardHeader() {
               onClick={handleResetToVercel}
               className="text-xs"
             >
-              Reset to Vercel AI
+              Reset Backend to /api
             </Button>
             <div className="flex gap-2">
               <Button
@@ -431,7 +656,7 @@ export function DashboardHeader() {
                 onClick={() => setModalOpen(false)}
                 className="text-xs"
               >
-                Close
+                Done
               </Button>
               <Button
                 type="button"
@@ -443,12 +668,12 @@ export function DashboardHeader() {
                 {isTesting ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    Testing...
+                    Testing Backend...
                   </>
                 ) : (
                   <>
                     <Check className="w-3.5 h-3.5" />
-                    Connect & Save
+                    Connect Backend
                   </>
                 )}
               </Button>

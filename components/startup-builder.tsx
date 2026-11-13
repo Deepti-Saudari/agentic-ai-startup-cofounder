@@ -20,7 +20,7 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react"
-import { getApiUrl } from "@/lib/api"
+import { apiFetch } from "@/lib/api"
 import { useStartup } from "@/context/startup-context"
 
 export default function StartupBuilder() {
@@ -39,11 +39,8 @@ export default function StartupBuilder() {
     setError(null)
 
     try {
-      const response = await fetch(getApiUrl("/startup-builder"), {
+      const response = await apiFetch("/startup-builder", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           skills,
           interests,

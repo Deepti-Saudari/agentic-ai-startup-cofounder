@@ -3,6 +3,7 @@ import { callGroq } from "@/lib/groq"
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const { startup_idea = "AI Startup Co-Founder", industry = "B2B SaaS" } = await req.json()
 
     const prompt = `Create a go-to-market and marketing strategy for:
@@ -57,6 +58,7 @@ Return ONLY valid JSON matching this schema:
       systemPrompt: "You are a Silicon Valley Chief Growth Officer and viral marketing architect. Return strictly valid JSON.",
       jsonMode: true,
       maxTokens: 3000,
+      apiKey: userApiKey,
       fallbackData: fallbackPlan,
     })
 

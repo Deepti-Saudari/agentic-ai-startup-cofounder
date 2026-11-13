@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Scale, FileText, Download, Eye, Shield, Users, Handshake, AlertTriangle, RefreshCw } from "lucide-react"
-import { getApiUrl } from "@/lib/api"
+import { apiFetch } from "@/lib/api"
 
 interface DocumentTemplate {
   id: string
@@ -288,11 +288,8 @@ export function LegalDocuments() {
   setIsGenerating(true);
   
   try {
-    const response = await fetch(getApiUrl("/generate-legal-document"), {
+    const response = await apiFetch("/generate-legal-document", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         template_name: selectedTemplate.name,
         startup_name: startupName,
@@ -325,11 +322,8 @@ const downloadDocument = async () => {
   try {
     setIsGenerating(true);
     
-    const response = await fetch(getApiUrl("/export-legal-pdf"), {
+    const response = await apiFetch("/export-legal-pdf", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         document: generatedDocument,
       }),

@@ -7,9 +7,9 @@ import re
 load_dotenv()
 
 try:
-    from config import client
+    from config import client, extract_json
 except ImportError:
-    from backend.config import client
+    from backend.config import client, extract_json
 
 
 def generate_operations_plan(startup_idea, industry):
@@ -49,14 +49,18 @@ Only JSON.
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}]
+        temperature=0.7,
+        max_tokens=3000,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": "You are a startup operations consultant. Output pure valid JSON."},
+            {"role": "user", "content": prompt}
+        ]
     )
 
     text = response.choices[0].message.content.strip()
+    result = extract_json(text)
+    if result and isinstance(result, dict) and "operations_structure" in result:
+        return result
 
-    text = re.sub(r"```json|```", "", text).strip()
-
-    try:
-        return json.loads(text)
-    except Exception as e:
-        return {"error": str(e), "raw": text}
+    return {"error": "Failed to parse operations JSON", "raw": text}

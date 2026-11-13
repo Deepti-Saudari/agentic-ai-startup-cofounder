@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const body = await req.json().catch(() => ({}));
     const skills = body.skills || "AI engineering, fullstack web development, product architecture";
     const interests = body.interests || "B2B SaaS, developer tooling, autonomous agents";
@@ -50,7 +51,7 @@ Return ONLY valid JSON.`;
     const raw = await chatCompletion([
       { role: "system", content: "You are a startup venture architect returning strictly pure JSON." },
       { role: "user", content: prompt },
-    ]);
+    ], { apiKey: userApiKey, max_tokens: 3000 });
 
     const parsed = parseJsonCompletion<any>(raw, {
       selected_idea: `Autonomous Ops Engine for ${interests.split(",")[0] || "B2B SaaS"}`,

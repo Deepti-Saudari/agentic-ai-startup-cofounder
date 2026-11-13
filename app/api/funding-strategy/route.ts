@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 import { callGroq } from "@/lib/groq"
 
+export const runtime = "nodejs"
+
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const { startup_idea = "AI SaaS", industry = "Technology" } = await req.json()
 
     const prompt = `Generate a funding strategy for:
@@ -63,6 +66,7 @@ Return ONLY valid JSON matching this schema:
       systemPrompt: "You are an experienced venture capitalist and startup fundraising advisor. Return strictly valid JSON.",
       jsonMode: true,
       maxTokens: 2500,
+      apiKey: userApiKey,
       fallbackData: fallbackPlan,
     })
 

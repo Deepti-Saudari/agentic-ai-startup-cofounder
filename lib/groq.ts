@@ -7,8 +7,8 @@ const GROQ_MODELS = [
   "llama3-8b-8192",
 ]
 
-function getCleanApiKey(): string {
-  const raw = process.env.GROQ_API_KEY || ""
+function getCleanApiKey(overrideKey?: string): string {
+  const raw = overrideKey || process.env.GROQ_API_KEY || ""
   return raw.trim().replace(/^["']|["']$/g, "")
 }
 
@@ -20,9 +20,10 @@ export async function callGroq(
     maxTokens?: number
     temperature?: number
     fallbackData?: any
+    apiKey?: string
   } = {}
 ): Promise<any> {
-  const apiKey = getCleanApiKey()
+  const apiKey = getCleanApiKey(options.apiKey)
 
   if (!apiKey) {
     console.warn("[Groq] No GROQ_API_KEY configured in environment. Using fallback response.")
@@ -99,9 +100,9 @@ export async function callGroq(
 
 export async function chatCompletion(
   messages: { role: string; content: string }[],
-  options: { model?: string; temperature?: number; max_tokens?: number } = {}
+  options: { model?: string; temperature?: number; max_tokens?: number; apiKey?: string } = {}
 ): Promise<string> {
-  const apiKey = getCleanApiKey()
+  const apiKey = getCleanApiKey(options.apiKey)
 
   if (!apiKey) {
     return ""

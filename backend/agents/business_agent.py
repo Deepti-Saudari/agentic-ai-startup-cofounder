@@ -6,9 +6,9 @@ import json
 load_dotenv()
 
 try:
-    from config import client
+    from config import client, extract_json
 except ImportError:
-    from backend.config import client
+    from backend.config import client, extract_json
 
 
 def generate_business_plan(startup_idea):
@@ -64,23 +64,21 @@ Rules:
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         temperature=0.7,
+        max_tokens=3000,
+        response_format={"type": "json_object"},
         messages=[
+            {"role": "system", "content": "You are an elite startup business planner. Return strictly valid JSON."},
             {"role": "user", "content": prompt}
         ]
     )
 
     text = response.choices[0].message.content.strip()
+    result = extract_json(text)
+    if result and isinstance(result, dict) and "lean_canvas" in result:
+        return result
 
-    # remove ```json wrappers if model adds them
-    if text.startswith("```"):
-        text = text.replace("```json", "").replace("```", "").strip()
-
-    try:
-        return json.loads(text)
-
-    except Exception:
-        return {
-            "lean_canvas": {},
-            "swot": {},
-            "executive_summary": {}
-        }
+    return {
+        "lean_canvas": {},
+        "swot": {},
+        "executive_summary": {}
+    }

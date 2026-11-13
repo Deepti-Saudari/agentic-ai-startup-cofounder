@@ -29,7 +29,7 @@ import {
   Network, Key, Bell, Sliders, Code, Terminal,
   Minus, Loader2
 } from "lucide-react"
-import { getApiUrl } from "@/lib/api"
+import { apiFetch } from "@/lib/api"
 
 // ============= INTERFACES =============
 
@@ -297,11 +297,8 @@ export function Operations() {
     setError(null);
 
     try {
-      const response = await fetch(getApiUrl("/operations-plan"), {
+      const response = await apiFetch("/operations-plan", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({
           startup_idea: startupIdea,
           industry: industry

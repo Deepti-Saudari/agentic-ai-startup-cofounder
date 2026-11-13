@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { callGroq } from '@/lib/groq';
+
+export const runtime = "nodejs";
 
 // Define types locally to avoid import issues
 interface Investor {
@@ -26,55 +29,67 @@ export async function POST(
   request: Request
 ): Promise<NextResponse> {
   try {
-    // Parse request body
-    const body = await request.json() as RequestBody;
-    
-    // Extract data with safe defaults
-    const industry = body?.industry || '';
-    const stage = body?.stage || '';
-    const startupIdea = body?.startupIdea || '';
-    
-    // Validate required fields
-    if (!industry || !stage) {
-      return NextResponse.json({ 
-        error: 'Industry and stage are required',
-        investors: []
-      }, { status: 400 });
+    const userApiKey = request.headers.get("x-groq-api-key") || undefined;
+    const body = (await request.json().catch(() => ({}))) as RequestBody;
+
+    const industry = body?.industry || 'Technology / AI';
+    const stage = body?.stage || 'Seed';
+    const startupIdea = body?.startupIdea || 'B2B AI Platform';
+
+    const fallbackInvestors = getDemoInvestors(industry, stage).map((inv, idx) => ({
+      ...inv,
+      match_score: 95 - idx * 4,
+    }));
+
+    const prompt = `You are a venture capital syndicate director.
+Find 6 premier venture capital firms, angel syndicates, or accelerators actively investing in this startup:
+Startup Idea: ${startupIdea}
+Industry: ${industry}
+Stage: ${stage}
+
+Return ONLY valid JSON matching this schema:
+{
+  "investors": [
+    {
+      "id": "1",
+      "name": "Lead Partner or Firm Name",
+      "firm": "Firm Name",
+      "type": "VC",
+      "location": "City, State or Country",
+      "investment_stage": ["${stage}"],
+      "check_size": "$500K - $3M",
+      "industries": ["${industry}", "AI & Software"],
+      "recent_investments": ["Company A", "Company B"],
+      "meeting_available": true,
+      "last_active": "Active this week",
+      "match_score": 96
     }
-    
-    // Get investors
-    const investors = getDemoInvestors(industry, stage);
-    
-    // Calculate scores
-    const investorsWithScores = investors.map((investor: Investor) => {
-      let score = 50;
-      
-      if (investor.industries.includes(industry)) score += 20;
-      if (investor.investment_stage.includes(stage)) score += 20;
-      
-      return {
-        ...investor,
-        match_score: Math.min(score, 99)
-      };
-    });
-    
-    // Sort by score
-    const sortedInvestors = investorsWithScores.sort((a: Investor, b: Investor) => 
-      (b.match_score || 0) - (a.match_score || 0)
-    );
+  ]
+}`;
 
-    return NextResponse.json({ 
-      investors: sortedInvestors,
+    const result = await callGroq(prompt, {
+      systemPrompt: "You are a Silicon Valley venture capitalist matching founders with top tier investors. Return strictly valid JSON.",
+      jsonMode: true,
+      maxTokens: 2500,
+      apiKey: userApiKey,
+      fallbackData: { investors: fallbackInvestors },
+    });
+
+    const investorsList = (result?.investors && Array.isArray(result.investors) && result.investors.length > 0)
+      ? result.investors
+      : fallbackInvestors;
+
+    return NextResponse.json({
+      investors: investorsList,
       timestamp: new Date().toISOString(),
-      total_found: sortedInvestors.length,
-      source: 'Demo data'
+      total_found: investorsList.length,
+      source: result?.investors ? 'Groq AI Live' : 'Demo data',
     });
-
   } catch (error) {
     console.error('Error in investors API:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Failed to fetch investors',
-      investors: []
+      investors: [],
     }, { status: 500 });
   }
 }
@@ -84,16 +99,16 @@ function getDemoInvestors(industry: string, stage: string): Investor[] {
   return [
     {
       id: '1',
-      name: 'Andreessen Horowitz',
+      name: 'Andreessen Horowitz (a16z)',
       firm: 'Andreessen Horowitz',
       type: 'VC',
       location: 'Menlo Park, CA',
-      investment_stage: ['Seed', 'Series A', 'Series B'],
-      check_size: '$1M - $50M',
+      investment_stage: [stage, 'Series A', 'Series B'],
+      check_size: '$1M - $15M',
       industries: [industry, 'AI/ML', 'Developer Tools'],
-      recent_investments: ['OpenAI', 'Databricks', 'Coinbase'],
+      recent_investments: ['OpenAI', 'Databricks', 'Cursor'],
       meeting_available: true,
-      last_active: 'This week'
+      last_active: 'This week',
     },
     {
       id: '2',
@@ -101,51 +116,64 @@ function getDemoInvestors(industry: string, stage: string): Investor[] {
       firm: 'Sequoia Capital',
       type: 'VC',
       location: 'Menlo Park, CA',
-      investment_stage: ['Seed', 'Series A', 'Series B', 'Series C'],
-      check_size: '$500K - $100M',
-      industries: [industry, 'Enterprise', 'Fintech'],
-      recent_investments: ['OpenAI', 'Snowflake', 'DoorDash'],
+      investment_stage: ['Pre-Seed', stage, 'Series A'],
+      check_size: '$500K - $5M',
+      industries: [industry, 'Enterprise', 'AI Infrastructure'],
+      recent_investments: ['Harvey AI', 'DoorDash', 'Stripe'],
       meeting_available: true,
-      last_active: 'This week'
+      last_active: 'Active yesterday',
     },
     {
       id: '3',
       name: 'Y Combinator',
       firm: 'Y Combinator',
       type: 'Accelerator',
-      location: 'Mountain View, CA',
-      investment_stage: ['Pre-seed', 'Seed'],
-      check_size: '$125K - $500K',
-      industries: ['All', 'Tech'],
-      recent_investments: ['Rippling', 'Gusto', 'Brex'],
+      location: 'San Francisco, CA',
+      investment_stage: ['Pre-Seed', 'Seed'],
+      check_size: '$500,000 standard SAFE',
+      industries: ['All Industries', industry],
+      recent_investments: ['Airbnb', 'Stripe', 'Coinbase', 'Scale AI'],
       meeting_available: true,
-      last_active: 'This month'
+      last_active: 'Active today',
     },
     {
       id: '4',
-      name: 'First Round Capital',
-      firm: 'First Round Capital',
+      name: 'Bessemer Venture Partners',
+      firm: 'Bessemer Venture Partners',
       type: 'VC',
       location: 'San Francisco, CA',
-      investment_stage: ['Seed', 'Series A'],
-      check_size: '$500K - $5M',
-      industries: [industry, 'SaaS', 'Consumer'],
-      recent_investments: ['Figma', 'Airtable', 'Notion'],
+      investment_stage: [stage, 'Series A'],
+      check_size: '$1M - $10M',
+      industries: ['Cloud Software', industry, 'Developer Tools'],
+      recent_investments: ['Shopify', 'Twilio', 'Zapier'],
       meeting_available: true,
-      last_active: 'This week'
+      last_active: 'This week',
     },
     {
       id: '5',
-      name: 'Techstars',
+      name: 'Founders Fund',
+      firm: 'Founders Fund',
+      type: 'VC',
+      location: 'San Francisco, CA',
+      investment_stage: ['Seed', 'Series A', 'Growth'],
+      check_size: '$1M - $20M',
+      industries: ['Deep Tech', 'Applied AI', industry],
+      recent_investments: ['SpaceX', 'Palantir', 'Figma'],
+      meeting_available: false,
+      last_active: '3 days ago',
+    },
+    {
+      id: '6',
+      name: 'Techstars Accelerator',
       firm: 'Techstars',
       type: 'Accelerator',
-      location: 'Boulder, CO',
-      investment_stage: ['Pre-seed', 'Seed'],
-      check_size: '$100K - $120K',
-      industries: ['All', 'Tech'],
-      recent_investments: ['SendGrid', 'Twilio', 'DigitalOcean'],
+      location: 'Boulder / Worldwide',
+      investment_stage: ['Pre-Seed', 'Seed'],
+      check_size: '$120,000 convertible',
+      industries: [industry, 'SaaS', 'B2B Tools'],
+      recent_investments: ['SendGrid', 'ClassPass', 'DigitalOcean'],
       meeting_available: true,
-      last_active: 'This month'
-    }
+      last_active: 'Active today',
+    },
   ];
 }

@@ -16,9 +16,7 @@ import {
   History, Network, Microscope, Scale, Globe, Target, Rocket,
   Zap, Shield, Award
 } from "lucide-react"
-import { API_BASE } from "@/lib/api"
-
-const API_BASE_URL = API_BASE
+import { apiFetch } from "@/lib/api"
 
 const getSafeString = (value) => {
   if (!value) return ""
@@ -72,9 +70,8 @@ export function IdeaGenerator() {
         ? { skills: userSkills, interests: userInterests, experience: userExperience, mode: "generate" }
         : { idea: userIdea, mode: "enhance" }
 
-      const response = await fetch(`${API_BASE_URL}/generate-ideas`, {
+      const response = await apiFetch("/generate-ideas", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
       })
 

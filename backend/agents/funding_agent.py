@@ -7,9 +7,9 @@ import re
 load_dotenv()
 
 try:
-    from config import client
+    from config import client, extract_json
 except ImportError:
-    from backend.config import client
+    from backend.config import client, extract_json
 
 
 def generate_funding_plan(startup_idea, industry):
@@ -45,19 +45,23 @@ Return JSON only.
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}]
+        temperature=0.7,
+        max_tokens=3000,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": "You are a startup fundraising advisor. Output pure valid JSON."},
+            {"role": "user", "content": prompt}
+        ]
     )
 
     text = response.choices[0].message.content.strip()
+    result = extract_json(text)
+    if result and isinstance(result, dict) and ("funding_stages" in result or "fundraising_strategy" in result):
+        return result
 
-    # Clean markdown if LLM returns ```json
-    text = re.sub(r"```json|```", "", text)
-
-    try:
-        return json.loads(text)
-
-    except json.JSONDecodeError:
-        return {
-            "error": "Invalid JSON returned",
-            "raw_output": text
-        }
+    return {
+        "funding_stages": [],
+        "investor_types": [],
+        "fundraising_strategy": [],
+        "use_of_funds": []
+    }

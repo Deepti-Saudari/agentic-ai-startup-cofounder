@@ -3,6 +3,7 @@ import { callGroq } from "@/lib/groq"
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const { startup_idea = "AI Co-Founder Suite", industry = "B2B SaaS" } = await req.json()
 
     const prompt = `Create a startup roadmap for:
@@ -78,6 +79,7 @@ Categories must be one of: product, business, funding, team, legal. Priority: hi
       systemPrompt: "You are a top accelerator director and startup roadmap advisor. Return strictly valid JSON.",
       jsonMode: true,
       maxTokens: 3000,
+      apiKey: userApiKey,
       fallbackData: fallbackRoadmap,
     })
 

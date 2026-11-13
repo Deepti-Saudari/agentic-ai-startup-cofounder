@@ -5,6 +5,7 @@ export const runtime = "nodejs"
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const body = await req.json().catch(() => ({}))
     const { skills = "Fullstack & AI Engineering", interests = "B2B SaaS, Productivity, Autonomous Agents", experience = "Senior Software Engineer", idea = "", mode = "generate" } = body
 
@@ -328,7 +329,8 @@ Return ONLY valid JSON matching the same comprehensive 8-layer schema.`
     const result = await callGroq(prompt, {
       systemPrompt: "You are a master venture capitalist and startup architect. Return ONLY valid JSON matching the exact schema with all 8 layers populated.",
       jsonMode: true,
-      maxTokens: 4000,
+      maxTokens: 3200,
+      apiKey: userApiKey,
       fallbackData,
     })
 

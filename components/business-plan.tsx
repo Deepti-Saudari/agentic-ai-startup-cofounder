@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { FileText, Target, TrendingUp, AlertTriangle, CheckCircle, Download, Save, RefreshCw } from "lucide-react"
-import { getApiUrl } from "@/lib/api"
+import { apiFetch } from "@/lib/api"
 import { useStartup } from "@/context/startup-context"
 
 interface LeanCanvasData {
@@ -80,11 +80,8 @@ export function BusinessPlan() {
     setIsGenerating(true)
 
     try {
-      const response = await fetch(getApiUrl("/business-plan"), {
+      const response = await apiFetch("/business-plan", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           startup_idea: startupIdea,
         }),
@@ -148,11 +145,8 @@ export function BusinessPlan() {
   const router = useRouter()
   const exportPDF = async () => {
 
-  const response = await fetch(getApiUrl("/export-business-plan"), {
+  const response = await apiFetch("/export-business-plan", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
     body: JSON.stringify({
       lean_canvas: leanCanvas,
       swot: swot,

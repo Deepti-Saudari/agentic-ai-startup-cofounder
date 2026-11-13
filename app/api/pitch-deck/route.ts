@@ -3,6 +3,7 @@ import { callGroq } from "@/lib/groq"
 
 export async function POST(req: Request) {
   try {
+    const userApiKey = req.headers.get("x-groq-api-key") || undefined
     const { startup_idea = "AI Co-Founder Suite", target_market = "Tech Founders" } = await req.json()
 
     const prompt = `Create a compelling 9-slide investor pitch deck for:
@@ -38,6 +39,7 @@ Return ONLY valid JSON matching this schema:
       systemPrompt: "You are a top Silicon Valley venture capitalist and pitch deck narrative architect. Return strictly valid JSON.",
       jsonMode: true,
       maxTokens: 2500,
+      apiKey: userApiKey,
       fallbackData: fallbackDeck,
     })
 
