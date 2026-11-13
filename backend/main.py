@@ -89,7 +89,14 @@ def root():
 @app.get("/health")
 def health_check(request: Request):
     req_key = request.headers.get("x-groq-api-key")
-    raw_key = req_key or os.getenv("GROQ_API_KEY", "")
+    raw_key = (
+        req_key
+        or os.getenv("GROQ_API_KEY", "")
+        or os.getenv("API_KEY", "")
+        or os.getenv("GROQ_KEY", "")
+        or os.getenv("GROQ_API", "")
+        or os.getenv("API", "")
+    )
     api_key = clean_api_key(raw_key)
     has_key = bool(api_key)
     masked = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else ("Configured" if has_key else "Missing")
@@ -105,7 +112,15 @@ def health_check(request: Request):
 @app.get("/test-groq")
 def test_groq(request: Request, key: Optional[str] = None):
     """Live diagnostic endpoint to verify Groq connectivity from Render or any host."""
-    req_key = key or request.headers.get("x-groq-api-key") or os.getenv("GROQ_API_KEY", "")
+    req_key = (
+        key
+        or request.headers.get("x-groq-api-key")
+        or os.getenv("GROQ_API_KEY", "")
+        or os.getenv("API_KEY", "")
+        or os.getenv("GROQ_KEY", "")
+        or os.getenv("GROQ_API", "")
+        or os.getenv("API", "")
+    )
     api_key = clean_api_key(req_key)
 
     if not api_key:

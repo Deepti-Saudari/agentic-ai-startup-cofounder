@@ -8,7 +8,16 @@ const GROQ_MODELS = [
 ]
 
 function getCleanApiKey(overrideKey?: string): string {
-  const raw = overrideKey || process.env.GROQ_API_KEY || ""
+  const raw =
+    overrideKey ||
+    process.env.GROQ_API_KEY ||
+    process.env.NEXT_PUBLIC_GROQ_API_KEY ||
+    process.env.GROQ_KEY ||
+    process.env.GROQ_API ||
+    process.env.GROQ_APIKEY ||
+    process.env.API_KEY ||
+    process.env.API ||
+    ""
   return raw.trim().replace(/^["']|["']$/g, "")
 }
 

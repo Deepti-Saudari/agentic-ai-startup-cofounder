@@ -134,7 +134,13 @@ class SafeGroqClient:
             return Groq(api_key=req_key)
 
         # 2. Check environment variable
-        env_key = clean_api_key(os.getenv("GROQ_API_KEY", ""))
+        env_key = clean_api_key(
+            os.getenv("GROQ_API_KEY", "")
+            or os.getenv("API_KEY", "")
+            or os.getenv("GROQ_KEY", "")
+            or os.getenv("GROQ_API", "")
+            or os.getenv("API", "")
+        )
         if not env_key:
             raise RuntimeError(
                 "GROQ_API_KEY is not configured. "

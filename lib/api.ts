@@ -32,7 +32,16 @@ export function getBaseApiUrl(): string {
     }
   }
 
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  const envUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_RENDER_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    process.env.API_URL ||
+    process.env.RENDER_URL ||
+    process.env.BACKEND_URL ||
+    process.env.SERVER_URL;
+
   if (envUrl && envUrl.trim()) {
     return envUrl.trim().replace(/\/+$/, "");
   }
